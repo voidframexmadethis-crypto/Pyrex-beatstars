@@ -1,0 +1,83 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model PyrexSpinnaInfiniteTrack {
+  id           String @id @default(uuid())
+  title        String @db.VarChar(255)
+  slug         String @unique
+  bpm          Int    @default(120)
+  keySignature String @default("C Minor") @map("key_signature") @db.VarChar(50)
+
+  genre    String   @default("Trap")
+  subGenre String?
+  moodTags String[]
+
+  // High-Throughput Infinite Cloud Storage Engine Arrays
+  awsAudioUrl       String? @map("aws_audio_url") @db.VarChar(1024)
+  awsArtworkUrl     String? @map("aws_artwork_url") @db.VarChar(1024)
+  r2AudioUrl        String? @map("r2_audio_url") @db.VarChar(1024)
+  r2ArtworkUrl      String? @map("r2_artwork_url") @db.VarChar(1024)
+  archiveAudioUrl   String? @map("archive_audio_url") @db.VarChar(1024)
+  archiveArtworkUrl String? @map("archive_artwork_url") @db.VarChar(1024)
+  vercelAudioUrl    String? @map("vercel_audio_url") @db.VarChar(1024)
+  vercelArtworkUrl  String? @map("vercel_artwork_url") @db.VarChar(1024)
+
+  watermarkedAudioUrl String?
+
+  storageClusterNode String @map("storage_cluster_node") @db.VarChar(100)
+
+  // Pricing Structure Tiers
+  priceMp3       Float @default(29.99)
+  priceWav       Float @default(49.99)
+  priceStems     Float @default(99.99)
+  priceExclusive Float @default(999.99)
+
+  isExclusiveSold Boolean @default(false)
+  isVaultLocked   Boolean @default(false) // For secret drop mode
+
+  streamCount   Int @default(0) @map("stream_count")
+  downloadCount Int @default(0)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt
+
+  sales Transaction[]
+
+  @@index([bpm])
+  @@index([genre])
+  @@index([keySignature])
+  @@map("pyrex_spinna_infinite_tracks")
+}
+
+model Transaction {
+  id             String                   @id @default(uuid())
+  trackId        String
+  track          PyrexSpinnaInfiniteTrack @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  buyerEmail     String // Captured for your automated marketing list
+  licenseType    String // MP3, WAV, STEMS, EXCLUSIVE
+  amountPaid     Float
+  paymentGateway String // Stripe, PayPal, Crypto
+  licensePdfUrl  String // Auto-generated legal contract link
+  createdAt      DateTime                 @default(now())
+
+  @@index([buyerEmail])
+}
+
+model RecordPlaque {
+  plaqueId                String   @id @default(uuid())
+  artistName              String
+  releaseTitle            String
+  milestoneType           String
+  frameStyle              String
+  verificationSourceUrl   String
+  customerShippingAddress Json
+  orderStatus             String
+  price                   Float
+  createdAt               DateTime @default(now())
+}

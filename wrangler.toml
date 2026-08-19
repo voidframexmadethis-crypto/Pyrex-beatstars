@@ -1,0 +1,9 @@
+name = "pyrex-spinna-beatz"
+compatibility_date = "2026-08-03"
+pages_build_output_dir = "dist"
+
+[vars]
+PERSONAL_PAYPAL_EMAIL = "pyrexspinna@gmail.com"
+
+[ai]
+binding = "AI"

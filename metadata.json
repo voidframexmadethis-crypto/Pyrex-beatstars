@@ -1,0 +1,8 @@
+{
+  "name": "Pyrex Spinna Beat Store",
+  "description": "Professional beat store for licensing trap, boom bap, and melodic instrumentals.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

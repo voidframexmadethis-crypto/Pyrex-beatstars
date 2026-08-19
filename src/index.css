@@ -1,0 +1,920 @@
+@import "tailwindcss";
+
+:root {
+  --midnight: #020204;
+  --glass-bg: rgba(10, 10, 14, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --accent-glow: rgba(99, 102, 241, 0.15);
+}
+
+/* Container that holds the waveform */
+.waveform-wrapper {
+  width: 100% !important;
+  min-width: 100% !important;
+  max-width: 100% !important;
+  display: block;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Forces WaveSurfer's internal canvas element to fill the wrapper */
+.waveform-wrapper canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Pyrex Spinna Store Container with fixed logo watermark */
+.store-container {
+  /* 1. Point directly to your high-quality logo asset */
+  background-image: url('/favicon.png');
+
+  /* 2. Lock background in place for a dynamic feel (Fixed) */
+  background-attachment: fixed;
+
+  /* 3. Center and cover the entire screen area smoothly */
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+
+  /* 4. Deep black base in case the image fails to load */
+  background-color: #000000;
+
+  /* Ensure the container is full screen height */
+  min-height: 100vh;
+}
+
+/* Semi-transparent inner main panels and cards so the logo shows through properly */
+.glass-morphism, .bg-card, .bg-zinc-900\/90, .bg-black\/80, .bg-zinc-950\/90, div[class*="bg-zinc-900"], div[class*="bg-black/"], div[class*="bg-neutral-900"] {
+  background: rgba(15, 10, 25, 0.6) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(168, 85, 247, 0.2) !important;
+}
+
+/* Exclusive Badge & Crown Icon */
+.exclusive-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 15;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(234, 179, 8, 0.6);
+  border-radius: 9999px;
+  padding: 4px 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.crown-icon {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.beat-price-tag {
+  @apply inline-flex items-center justify-center px-3 py-1 bg-indigo-600/10 border border-indigo-500/20 text-indigo-400 rounded-lg text-xs font-black tracking-widest uppercase transition-all hover:bg-indigo-600/20 hover:border-indigo-500/40;
+}
+
+.beat-price-tag span {
+  @apply drop-shadow-sm;
+}
+
+html, body {
+  background-color: var(--midnight);
+  color: #ffffff;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100vh;
+  cursor: none; /* Hide default cursor for custom one */
+}
+
+/* Custom Cursor */
+.custom-cursor {
+  width: 20px;
+  height: 20px;
+  background: white;
+  border-radius: 50%;
+  position: fixed;
+  pointer-events: none;
+  z-index: 10000;
+  mix-blend-mode: difference;
+  transition: transform 0.1s ease;
+}
+
+.custom-cursor-follower {
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  transition: transform 0.15s ease, width 0.3s ease, height 0.3s ease;
+}
+
+.glass-morphism {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+}
+
+.midnight-glow {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 50% 50%, var(--accent-glow) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.storefront-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-image: url('/favicon.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.08;
+  filter: drop-shadow(0 0 50px rgba(168, 85, 247, 0.35));
+  z-index: 0;
+  pointer-events: none;
+}
+
+.storefront-card {
+  background: rgba(11, 12, 16, 0.85); /* Deep obsidian glass */
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(168, 85, 247, 0.25); /* Subtle ultraviolet edge */
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1); /* Metallic depth */
+  padding: 24px;
+  color: #ffffff;
+}
+
+.storefront-button {
+  background: linear-gradient(135deg, #9333ea, #c084fc); /* Metallic purple gradient matching your logo */
+  color: #ffffff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);
+  transition: all 0.2s ease;
+}
+
+.storefront-button:hover {
+  box-shadow: 0 6px 25px rgba(168, 85, 247, 0.7);
+  transform: translateY(-1px);
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+#root {
+  background-color: #0a0a0a;
+  min-height: 100vh;
+}
+
+.player-card { 
+  max-width: 450px; 
+  margin: 40px auto; 
+  background: #0f172a; 
+  padding: 25px; 
+  border-radius: 16px; 
+  border: 1px solid #1e293b; 
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+}
+.artwork-view { 
+  width: 250px; 
+  height: 250px; 
+  border-radius: 12px; 
+  object-fit: cover; 
+  margin-bottom: 20px; 
+  border: 2px solid #00ffcc; 
+  box-shadow: 0 4px 15px rgba(0,255,204,0.2); 
+}
+.price-text { 
+  color: #00ffcc; 
+  font-size: 2.2rem; 
+  font-weight: bold; 
+  margin: 15px 0; 
+}
+.btn-paypal { 
+  display: inline-block; 
+  width: 100%; 
+  max-width: 280px; 
+  padding: 14px; 
+  background-color: #0070ba; 
+  color: #fff; 
+  text-decoration: none; 
+  font-weight: bold; 
+  border-radius: 50px; 
+  text-transform: uppercase; 
+  box-shadow: 0 4px 15px rgba(0,112,186,0.4); 
+  margin-top: 10px; 
+}
+
+/* Isolated Audio Element Container - Locked Layout Guard */
+.global-audio-player-anchor {
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  z-index: 99999 !important; /* Forces player to stay visible above checkout modals */
+  pointer-events: auto !important;
+}
+
+.checkout-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.checkout-modal {
+  background: #1a1a1e;
+  border: 1px solid #2e2e35;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 850px;
+  padding: 30px;
+  position: relative;
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+}
+
+.close-modal-btn {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background: transparent;
+  border: none;
+  color: #a1a1aa;
+  font-size: 28px;
+  cursor: pointer;
+}
+
+.checkout-layout-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  gap: 30px;
+  margin-top: 15px;
+}
+
+.checkout-art-placeholder {
+  width: 100%;
+  aspect-ratio: 1/1;
+  background: #26262b;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 48px;
+  overflow: hidden;
+}
+
+.checkout-art-placeholder img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.track-meta-pills {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+}
+
+.track-meta-pills span {
+  background: #26262b;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  color: #a1a1aa;
+}
+
+.license-card {
+  display: block;
+  background: #26262b;
+  border: 1px solid #2e2e35;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.license-card.selected {
+  border-color: #ff3b30;
+  background: #2d1f21;
+}
+
+.license-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.license-title-text {
+  font-weight: 600;
+  flex-grow: 1;
+}
+
+.license-price-text {
+  font-weight: 700;
+  color: #ff3b30;
+}
+
+.license-feature-bullets {
+  margin: 12px 0 0 24px;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+  color: #a1a1aa;
+}
+
+.license-feature-bullets li {
+  margin-bottom: 4px;
+}
+
+.total-due-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 18px;
+  margin: 20px 0 10px 0;
+  border-top: 1px solid #2e2e35;
+  padding-top: 15px;
+}
+
+.bold-total {
+  font-weight: 800;
+  color: #ff3b30;
+}
+
+.instant-checkout-btn {
+  width: 100%;
+  padding: 14px;
+  background: #0070ba; /* PayPal Blue */
+  color: white;
+  border: none;
+  font-weight: 700;
+  font-size: 16px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.secure-notice {
+  font-size: 11px;
+  color: #a1a1aa;
+  text-align: center;
+  margin-top: 8px;
+}
+
+/* KS Main Player Bar Styles (BeatStars/Airbit Style) */
+.ks-player-bar {
+  background: #0a0b0f;
+  border-top: 1px solid #1f2937;
+  padding: 0;
+  color: #ffffff;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  height: 80px;
+  box-shadow: 0 -10px 25px rgba(0,0,0,0.5);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+#pro-audio-engine-root {
+  color: #ffffff;
+}
+
+.engine-card-flat {
+  width: 100%;
+}
+
+.engine-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.engine-title {
+  font-size: 15px;
+  font-weight: 700;
+  display: block;
+  color: #fff;
+}
+
+.engine-artist {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.engine-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.engine-play-trigger {
+  background: #a855f7;
+  color: #fff;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 13px;
+  min-width: 90px;
+  transition: all 0.2s;
+}
+
+.engine-play-trigger:hover {
+  background: #9333ea;
+  transform: scale(1.02);
+}
+
+.engine-timeline {
+  flex-grow: 1;
+  background: #1a2236;
+  height: 6px;
+  border-radius: 3px;
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.engine-progress-bar {
+  background: #38bdf8;
+  height: 100%;
+  width: 0%;
+  pointer-events: none;
+  transition: width 0.1s linear;
+}
+
+.engine-time {
+  font-size: 12px;
+  color: #94a3b8;
+  min-width: 80px;
+  text-align: right;
+  font-family: monospace;
+}
+
+
+
+/* User provided player design */
+.krypside-player-card {
+    width: 100%;
+    max-width: 999px;
+    height: 155px;
+    background-color: #121212;
+    border: 1px solid #222;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    box-sizing: border-box;
+    gap: 16px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #ffffff;
+    margin: 0 auto;
+}
+
+.artwork-container {
+    width: 120px;
+    height: 120px;
+    flex-shrink: 0;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #000;
+}
+
+.track-artwork {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.track-info-section {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 6px;
+}
+
+.title-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.play-btn-circle {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #a855f7;
+    border: none;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.track-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.producer-name {
+    font-size: 12px;
+    color: #888;
+    margin: 0;
+}
+
+.metrics-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 11px;
+    color: #aaa;
+}
+
+.badge {
+    background: #1f1f1f;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.date {
+    color: #888;
+}
+
+.action-buttons {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.price-btn {
+    background: #a855f7;
+    color: white;
+    border: none;
+    padding: 5px 12px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.action-icon-btn {
+    background: #222;
+    color: #ccc;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+}
+
+.right-panel {
+    width: 320px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    padding-left: 10px;
+    border-left: 1px solid #222;
+}
+
+.tag-pills {
+    display: flex;
+    gap: 6px;
+    overflow: hidden;
+}
+
+.tag-pill {
+    background: #1a1a1a;
+    color: #888;
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 12px;
+    white-space: nowrap;
+}
+
+.waveform-container {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 45px;
+    width: 100%;
+}
+
+.wave-bar {
+    flex-grow: 1;
+    background: #444;
+    border-radius: 2px;
+    transition: height 0.2s;
+}
+
+.wave-bar:hover {
+    background: #a855f7;
+}
+
+/* Docked sticky audio player bar */
+.docked-player-wrapper {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 9999;
+}
+.floating-player-wrapper {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 9999;
+}
+
+.catalog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* Reduce heavy backdrop filters and shadows on iPads if they cause heat */
+@media (max-width: 1024px) {
+  .glassmorphism, .card, nav {
+    /* Simplify heavy backdrop-filter blur on mobile chips */
+    backdrop-filter: blur(8px); 
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  /* Force GPU rendering layers for smooth elements without layout thrashing */
+  canvas, .visualizer-container, .audio-player-bar {
+    transform: translateZ(0);
+    will-change: transform;
+  }
+}
+
+/* PYREX SPINNA ROYAL METALLIC PURPLE THEME OVERRIDES */
+:root {
+  --midnight: #030305;
+  --glass-bg: rgba(6, 6, 9, 0.75);
+  --glass-border: rgba(168, 85, 247, 0.22);
+  --accent-glow: rgba(168, 85, 247, 0.25);
+  --primary-purple: #9333ea;
+  --light-purple: #c084fc;
+  --dark-purple: #6b21a8;
+}
+
+/* Base button and clickable overrides to guarantee pristine consistency */
+button:not(.close-modal-btn):not([class*="bg-transparent"]):not([class*="bg-neutral"]):not([class*="bg-emerald"]):not([class*="bg-green"]):not([class*="bg-red"]):not(.play-btn-circle),
+.storefront-button,
+.instant-checkout-btn,
+.engine-play-trigger,
+.price-btn,
+.checkout-btn,
+.submit-btn {
+  background: linear-gradient(135deg, var(--dark-purple) 0%, var(--primary-purple) 50%, var(--light-purple) 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(192, 132, 252, 0.45) !important;
+  box-shadow: 0 4px 15px rgba(168, 85, 247, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+button:not(.close-modal-btn):not([class*="bg-transparent"]):not([class*="bg-neutral"]):not([class*="bg-emerald"]):not([class*="bg-green"]):not([class*="bg-red"]):not(.play-btn-circle):hover,
+.storefront-button:hover,
+.instant-checkout-btn:hover,
+.engine-play-trigger:hover,
+.price-btn:hover,
+.checkout-btn:hover,
+.submit-btn:hover {
+  background: linear-gradient(135deg, var(--primary-purple) 0%, var(--light-purple) 50%, #e879f9 100%) !important;
+  box-shadow: 0 6px 25px rgba(168, 85, 247, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+  transform: translateY(-1.5px) scale(1.02);
+  border-color: rgba(232, 121, 249, 0.6) !important;
+}
+
+button:not(.close-modal-btn):not([class*="bg-transparent"]):not([class*="bg-neutral"]):not([class*="bg-emerald"]):not([class*="bg-green"]):not([class*="bg-red"]):not(.play-btn-circle):active,
+.storefront-button:active,
+.instant-checkout-btn:active,
+.price-btn:active {
+  transform: translateY(0.5px) scale(0.98);
+  box-shadow: 0 2px 10px rgba(168, 85, 247, 0.4) !important;
+}
+
+/* Force standard Tailwind background utility classes to purple matching the logo theme */
+.bg-indigo-600, .bg-blue-600, .bg-indigo-500, .bg-sky-500, .bg-indigo-700 {
+  background: linear-gradient(135deg, var(--dark-purple) 0%, var(--primary-purple) 50%, var(--light-purple) 100%) !important;
+  color: #ffffff !important;
+  border-color: rgba(192, 132, 252, 0.3) !important;
+}
+
+.hover\:bg-indigo-500:hover, .hover\:bg-blue-500:hover, .hover\:bg-indigo-700:hover, .hover\:bg-sky-400:hover {
+  background: linear-gradient(135deg, var(--primary-purple) 0%, var(--light-purple) 50%, #e879f9 100%) !important;
+}
+
+/* Text and highlights color updates to majestic violet */
+.text-indigo-400, .text-blue-400, .text-indigo-300, .text-sky-400, .\text-\[\#6366f1\], .\text-\[\#00ffcc\] {
+  color: var(--light-purple) !important;
+  text-shadow: 0 0 10px rgba(168, 85, 247, 0.35);
+}
+
+.border-indigo-500, .border-indigo-500\/50, .\border-\[\#1e1e24\], .border-neutral-800 {
+  border-color: rgba(168, 85, 247, 0.35) !important;
+}
+
+.bg-indigo-500\/10, .bg-indigo-900\/50, .bg-indigo-500\/5, .bg-indigo-500\/20, .bg-indigo-500\/30 {
+  background-color: rgba(168, 85, 247, 0.12) !important;
+}
+
+.from-indigo-900, .from-blue-900 {
+  --tw-gradient-from: #15062c !important;
+}
+
+.to-indigo-900, .to-blue-900 {
+  --tw-gradient-to: #05010a !important;
+}
+
+/* Make progress bars, waveforms and sliders match perfectly */
+.engine-progress-bar, .wave-bar:hover, .progress-fill, .slider-fill {
+  background-color: var(--light-purple) !important;
+  box-shadow: 0 0 12px var(--light-purple) !important;
+}
+
+/* Customize play/pause triggers and circular icons */
+.play-btn-circle, .play-pause-btn {
+  background-color: var(--primary-purple) !important;
+  box-shadow: 0 0 15px rgba(168, 85, 247, 0.5) !important;
+}
+.play-btn-circle:hover, .play-pause-btn:hover {
+  background-color: var(--light-purple) !important;
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.8) !important;
+}
+
+/* Layout and container transparency overrides to show the background watermark everywhere */
+.bg-black, .\bg-\[\#000000\] {
+  background-color: rgba(3, 3, 5, 0.45) !important;
+}
+
+.bg-gray-950, .bg-neutral-950 {
+  background-color: rgba(6, 6, 9, 0.5) !important;
+}
+
+.bg-neutral-900, .\bg-\[\#0c0c0e\], .\bg-\[\#111111\], .bg-gray-900 {
+  background-color: rgba(12, 12, 15, 0.55) !important;
+}
+
+.bg-neutral-800 {
+  background-color: rgba(24, 24, 28, 0.55) !important;
+}
+
+/* Modals receive a gorgeous deep blurred finish safely */
+div[id*="modal"], div[class*="modal"] {
+  background-color: rgba(5, 5, 8, 0.8) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}
+
+/* HIGH CONTRAST & READABILITY OVERRIDES FOR WATERMARK BACKGROUND */
+body {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95), 0 2px 4px rgba(0, 0, 0, 0.8) !important;
+}
+
+h1, h2, h3, h4, h5, h6, .font-bold, .font-black, .font-semibold {
+  color: #ffffff !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.95), 0 4px 8px rgba(0, 0, 0, 0.8) !important;
+}
+
+/* Brighten grey text utility classes to guarantee legibility against the logo watermark */
+.text-neutral-400, .text-gray-400, .text-zinc-400 {
+  color: #e4e4e7 !important; /* Zinc-200 for outstanding contrast */
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95) !important;
+}
+
+.text-neutral-500, .text-gray-500, .text-zinc-500 {
+  color: #d4d4d8 !important; /* Zinc-300 */
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95) !important;
+}
+
+p, span, li, label, td, th {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95), 0 2px 4px rgba(0, 0, 0, 0.7) !important;
+}
+
+/* Ensure form inputs and textareas have full high contrast white color and dark backdrops */
+input, textarea, select {
+  color: #ffffff !important;
+  background-color: rgba(10, 10, 12, 0.85) !important;
+  border-color: rgba(168, 85, 247, 0.45) !important;
+  text-shadow: none !important; /* Standard input text doesn't need heavy shadows */
+}
+
+input::placeholder, textarea::placeholder {
+  color: #a1a1aa !important;
+}
+
+/* Ensure backdrop layers stay dark and readable */
+.bg-neutral-900\/50, .bg-neutral-950\/20, .bg-neutral-950\/40, .bg-neutral-950\/50, .bg-neutral-950\/60 {
+  background-color: rgba(10, 10, 12, 0.75) !important;
+  border: 1px solid rgba(168, 85, 247, 0.2) !important;
+}
+
+/* Standalone Audio Player Custom Classes */
+.player-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: rgba(10, 10, 15, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(168, 85, 247, 0.25);
+  z-index: 9999;
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.8);
+}
+
+.play-btn {
+  background: linear-gradient(135deg, #9333ea, #c084fc);
+  color: #ffffff;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);
+}
+
+.play-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(168, 85, 247, 0.7);
+}
+
+.scrubber {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 9999px;
+  outline: none;
+  cursor: pointer;
+}
+
+.scrubber::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #c084fc;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(192, 132, 252, 0.8);
+  transition: transform 0.1s ease;
+}
+
+.scrubber::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
