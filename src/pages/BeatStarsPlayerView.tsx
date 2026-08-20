@@ -3,6 +3,7 @@ import { Play, Pause, Trash2, SkipBack, SkipForward, Volume2, Share2, Download, 
 import { useAudioPlayer } from '../context/AudioPlayerContext';
 import { motion, AnimatePresence } from 'motion/react';
 import { Beat } from '../types';
+import { getSafeKey } from '../lib/utils';
 
 export default function BeatStarsPlayerView() {
   const { 
@@ -337,7 +338,9 @@ export default function BeatStarsPlayerView() {
                                 <img src={track.coverArtUrl || ''} className="w-full h-full object-cover" alt="" />
                               </div>
                               <div className="min-w-0">
-                                <p className={`font-black text-lg truncate transition-colors ${isActive ? 'text-indigo-400' : 'text-white'}`}>{track.title}</p>
+                                <h4 className="font-semibold text-white">
+                                  {track.title || "Untitled Track"}
+                                </h4>
                                 <p className="text-xs font-bold text-neutral-600 uppercase tracking-widest">{track.producer || 'Pyrex Spinna'}</p>
                               </div>
                             </div>

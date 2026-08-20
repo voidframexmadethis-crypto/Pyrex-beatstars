@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useStore } from '../context/StoreContext';
 import { Sliders, Volume2, ShieldAlert, FileCode, CheckCircle, Play, Pause, ShoppingCart, Download, Send, Globe, Radio } from 'lucide-react';
 import { ServicesHub } from '../components/ServicesHub';
+import { getSafeKey } from '../lib/utils';
 
 export default function EnterpriseMusicPlatform() {
   const { state } = useStore();
@@ -9,7 +10,6 @@ export default function EnterpriseMusicPlatform() {
   // --- STATE MANAGEMENT (Self-Contained Storage Engine) ---
   const [activeTab, setActiveTab] = useState('marketplace');
   const [userRole, setUserRole] = useState('Rapper');
-  const [beats, setBeats] = useState<any[]>([]);
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [logConsole, setLogConsole] = useState<string[]>(["[System] Multi-tenant gateway initialized..."]);
 
@@ -48,9 +48,7 @@ export default function EnterpriseMusicPlatform() {
   const [stdGenre, setStdGenre] = useState('Hip-Hop / Rap');
   const [stdUpcCode, setStdUpcCode] = useState('');
   const [stdIswcCode, setStdIswcCode] = useState('');
-  const [stdTracks, setStdTracks] = useState<{ id: number; title: string; composer: string; explicit: string }[]>([
-    { id: 1, title: '', composer: '', explicit: 'Clean' }
-  ]);
+  const [stdTracks, setStdTracks] = useState<{ id: number; title: string; composer: string; explicit: string }[]>([]);
   const [stdPipelineLogs, setStdPipelineLogs] = useState<string[]>([
     "[System Node] Standby: Awaiting standard DDEX ingestion compliance forms..."
   ]);
@@ -383,30 +381,16 @@ export default function EnterpriseMusicPlatform() {
             <div>
               <h2 style={{ marginTop: 0, fontSize: '1.4rem', borderBottom: '1px solid #334155', paddingBottom: '10px', marginBottom: '20px' }}>Lossless Beat Catalog</h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                {beats.map((beat, idx) => (
-                  <div key={beat.id ? `${beat.id}-${idx}` : idx} style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', padding: '15px', backgroundColor: '#1e293b', borderRadius: '8px', border: '1px solid #334155', gap: '15px' }}>
+                {state.beats.map((track, idx) => (
+                  <div key={getSafeKey(track, idx, 'beat-marketplace')} style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', padding: '15px', backgroundColor: '#111827', borderRadius: '8px', border: '1px solid #1e293b', gap: '15px' }}>
                     <div>
-                      <h4 style={{ margin: '0 0 5px 0', fontSize: '1.1rem', color: '#f8fafc' }}>{beat.title}</h4>
-                      <p style={{ margin: 0, fontSize: '0.85rem', color: '#94a3b8' }}>BPM: {beat.bpm} | Key: {beat.key} | Producer: <span style={{ color: '#38bdf8' }}>{beat.producer}</span></p>
+                      <h4 style={{ margin: '0 0 5px 0', fontSize: '1.1rem', color: '#f8fafc' }}>{track.title} <span style={{ fontSize: '0.7rem', color: '#10b981', backgroundColor: '#064e3b', padding: '2px 6px', borderRadius: '4px', marginLeft: '5px' }}>Store Live</span></h4>
+                      <p style={{ margin: 0, fontSize: '0.85rem', color: '#94a3b8' }}>BPM: {track.bpm} | Key: {track.key} | Producer: <span style={{ color: '#38bdf8' }}>{track.producer}</span> | Genre: {track.primaryGenre || 'Hip Hop'}</p>
                     </div>
                     <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
-                      <span style={{ fontWeight: 'bold', fontSize: '1.2rem', color: '#4ade80', marginRight: '10px' }}>${beat.price.toFixed(2)}</span>
-                      <button onClick={() => submitToAnR(beat.title)} style={{ padding: '8px 12px', backgroundColor: '#64748b', border: 'none', color: '#fff', borderRadius: '4px', cursor: 'pointer', fontSize: '0.85rem' }} className="hover:bg-slate-500 transition-colors">Submit Demo</button>
-                      <button onClick={() => handlePurchase(beat)} style={{ padding: '8px 16px', backgroundColor: '#22c55e', border: 'none', color: '#fff', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.85rem' }} className="hover:bg-green-600 transition-colors">Purchase</button>
-                    </div>
-                  </div>
-                ))}
-
-                {state.beats.map((beat, idx) => (
-                  <div key={beat.id ? `${beat.id}-${idx}` : idx} style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', padding: '15px', backgroundColor: '#111827', borderRadius: '8px', border: '1px solid #1e293b', gap: '15px' }}>
-                    <div>
-                      <h4 style={{ margin: '0 0 5px 0', fontSize: '1.1rem', color: '#f8fafc' }}>{beat.title} <span style={{ fontSize: '0.7rem', color: '#10b981', backgroundColor: '#064e3b', padding: '2px 6px', borderRadius: '4px', marginLeft: '5px' }}>Store Live</span></h4>
-                      <p style={{ margin: 0, fontSize: '0.85rem', color: '#94a3b8' }}>BPM: {beat.bpm} | Key: {beat.key} | Producer: <span style={{ color: '#38bdf8' }}>{beat.producer}</span> | Genre: {beat.primaryGenre || 'Hip Hop'}</p>
-                    </div>
-                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
-                      <span style={{ fontWeight: 'bold', fontSize: '1.2rem', color: '#10b981', marginRight: '10px' }}>${Number(beat.price).toFixed(2)}</span>
-                      <button onClick={() => submitToAnR(beat.title)} style={{ padding: '8px 12px', backgroundColor: '#64748b', border: 'none', color: '#fff', borderRadius: '4px', cursor: 'pointer', fontSize: '0.85rem' }} className="hover:bg-slate-500 transition-colors">Submit Demo</button>
-                      <button onClick={() => handlePurchase({ title: beat.title, producer: beat.producer, price: beat.price })} style={{ padding: '8px 16px', backgroundColor: '#22c55e', border: 'none', color: '#fff', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.85rem' }} className="hover:bg-green-600 transition-colors">Purchase</button>
+                      <span style={{ fontWeight: 'bold', fontSize: '1.2rem', color: '#10b981', marginRight: '10px' }}>${Number(track.price).toFixed(2)}</span>
+                      <button onClick={() => submitToAnR(track.title)} style={{ padding: '8px 12px', backgroundColor: '#64748b', border: 'none', color: '#fff', borderRadius: '4px', cursor: 'pointer', fontSize: '0.85rem' }} className="hover:bg-slate-500 transition-colors">Submit Demo</button>
+                      <button onClick={() => handlePurchase({ title: track.title, producer: track.producer, price: track.price })} style={{ padding: '8px 16px', backgroundColor: '#22c55e', border: 'none', color: '#fff', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.85rem' }} className="hover:bg-green-600 transition-colors">Purchase</button>
                     </div>
                   </div>
                 ))}
@@ -426,8 +410,8 @@ export default function EnterpriseMusicPlatform() {
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {submissions.map(sub => (
-                    <div key={sub.id} style={{ padding: '15px', backgroundColor: '#1e293b', borderRadius: '8px', border: '1px solid #334155' }}>
+                  {submissions.map((sub, index) => (
+                    <div key={getSafeKey(sub, index, 'submission')} style={{ padding: '15px', backgroundColor: '#1e293b', borderRadius: '8px', border: '1px solid #334155' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', flexWrap: 'wrap', gap: '5px' }}>
                         <strong style={{ color: '#f8fafc' }}>🎵 Track: {sub.track}</strong>
                         <span style={{ backgroundColor: sub.status === 'Distributed to DSPs' ? '#14532d' : '#7c2d12', color: '#fff', padding: '3px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold' }}>{sub.status}</span>
@@ -474,61 +458,18 @@ export default function EnterpriseMusicPlatform() {
                     style={{ backgroundColor: '#0f172a', color: '#f8fafc', border: '1px solid #334155', padding: '6px 12px', borderRadius: '4px' }}
                     onChange={(e) => addLog(`🎛️ Loaded multi-track stem archives for track: "${e.target.value}"`)}
                   >
-                    {beats.map((b, idx) => (
-                      <option key={b.id ? `${b.id}-${idx}` : idx} value={b.title}>{b.title} (Lossless stems)</option>
-                    ))}
-                    {state.beats.map((b, idx) => (
-                      <option key={b.id ? `${b.id}-${idx}` : idx} value={b.title}>{b.title} (Lossless stems)</option>
+                    <option value="">Select a track...</option>
+                    {state.beats.map((track, idx) => (
+                      <option key={getSafeKey(track, idx, 'stem-track')} value={track.title}>{track.title} (Lossless stems)</option>
                     ))}
                   </select>
                 </div>
 
                 {/* Stems list */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                  {[
-                    { name: 'Kick & Percussions (Drums)', vol: 85, pan: 'C' },
-                    { name: 'Sub-Zero Bassline', vol: 90, pan: 'C' },
-                    { name: 'Lead Synths & Chords', vol: 70, pan: 'L15' },
-                    { name: 'Atmosphere FX Elements', vol: 60, pan: 'R20' },
-                  ].map((stem, i) => (
-                    <div key={i} style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '15px', padding: '12px', backgroundColor: '#0f172a', borderRadius: '6px', border: '1px solid #334155' }}>
-                      <div style={{ flex: '1', minWidth: '150px' }}>
-                        <strong style={{ display: 'block', fontSize: '0.9rem', color: '#f8fafc' }}>{stem.name}</strong>
-                        <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Format: 24-bit 48kHz WAV</span>
-                      </div>
-                      
-                      {/* Vol slider */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: '150px', flex: '1' }}>
-                        <Volume2 size={14} className="text-neutral-400" />
-                        <input 
-                          type="range" 
-                          min="0" 
-                          max="100" 
-                          defaultValue={stem.vol} 
-                          onChange={(e) => addLog(`🎛️ Balanced ${stem.name} volume to ${e.target.value}%`)}
-                          style={{ flex: '1', cursor: 'pointer', accentColor: '#38bdf8' }}
-                        />
-                      </div>
-
-                      {/* Mute/Solo buttons */}
-                      <div style={{ display: 'flex', gap: '5px' }}>
-                        <button 
-                          onClick={() => addLog(`🔇 Muted track: ${stem.name}`)}
-                          style={{ padding: '4px 8px', fontSize: '0.75rem', backgroundColor: '#334155', border: 'none', borderRadius: '4px', cursor: 'pointer', color: '#f8fafc' }}
-                          className="hover:bg-slate-600 transition-colors"
-                        >
-                          MUTE
-                        </button>
-                        <button 
-                          onClick={() => addLog(`🔊 Soloed track: ${stem.name}`)}
-                          style={{ padding: '4px 8px', fontSize: '0.75rem', backgroundColor: '#0284c7', border: 'none', borderRadius: '4px', cursor: 'pointer', color: '#f8fafc' }}
-                          className="hover:bg-sky-500 transition-colors"
-                        >
-                          SOLO
-                        </button>
-                      </div>
-                    </div>
-                  ))}
+                  <p style={{ fontSize: '0.85rem', color: '#94a3b8', textAlign: 'center', padding: '20px' }}>
+                    Select a track to load stem components.
+                  </p>
                 </div>
 
                 {/* Render Button */}
@@ -573,7 +514,7 @@ export default function EnterpriseMusicPlatform() {
                       }}
                       style={{ width: '100%', backgroundColor: '#0f172a', color: '#38bdf8', border: '1px solid #334155', padding: '10px', borderRadius: '6px', fontWeight: 'bold' }}
                     >
-                      {Object.keys(distroProfiles).map(name => <option key={name} value={name}>{name} Gateway</option>)}
+                      {Object.keys(distroProfiles).map((name, index) => <option key={getSafeKey(name, index, 'distro-profile')} value={name}>{name} Gateway</option>)}
                     </select>
                   </div>
 
@@ -621,7 +562,7 @@ export default function EnterpriseMusicPlatform() {
                     <h4 style={{ margin: '0 0 10px 0', fontSize: '0.75rem', color: '#a855f7', letterSpacing: '0.1em', fontWeight: 'bold' }}>📡 LIVE AGGREGATOR INTAKE MONITOR</h4>
                     <div style={{ backgroundColor: '#090d16', border: '1px solid #1e293b', padding: '10px', borderRadius: '6px', fontSize: '0.75rem', fontFamily: 'monospace', color: '#a855f7', flexGrow: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '5px', lineHeight: '1.4', maxHeight: '200px' }}>
                       {deliveryLogs.map((log, i) => (
-                        <div key={i} style={{ borderBottom: '1px solid #1e293b', paddingBottom: '3px' }}>
+                        <div key={getSafeKey(log, i, 'delivery-log')} style={{ borderBottom: '1px solid #1e293b', paddingBottom: '3px' }}>
                           {log}
                         </div>
                       ))}
@@ -1087,24 +1028,24 @@ export default function EnterpriseMusicPlatform() {
                         
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '180px', overflowY: 'auto', paddingRight: '5px' }}>
                           {stdTracks.map((track, idx) => (
-                            <div key={track.id} style={{ display: 'grid', gridTemplateColumns: '30px 1.5fr 1.2fr 1fr 40px', gap: '8px', alignItems: 'center', backgroundColor: '#090d16', padding: '8px', borderRadius: '6px', border: '1px solid #1e293b' }}>
-                              <span style={{ fontSize: '0.85rem', color: '#94a3b8', textAlign: 'center', fontWeight: 'bold' }}>#{idx + 1}</span>
-                              <input 
-                                type="text" 
-                                placeholder="Track Title" 
-                                value={track.title} 
-                                onChange={(e) => updateTrackDetails(track.id, 'title', e.target.value)}
-                                required
-                                style={{ backgroundColor: '#0f172a', color: '#fff', border: '1px solid #334155', padding: '6px 10px', borderRadius: '4px', fontSize: '0.8rem', width: '100%', boxSizing: 'border-box' }}
-                              />
-                              <input 
-                                type="text" 
-                                placeholder="Composer" 
-                                value={track.composer} 
-                                onChange={(e) => updateTrackDetails(track.id, 'composer', e.target.value)}
-                                required
-                                style={{ backgroundColor: '#0f172a', color: '#fff', border: '1px solid #334155', padding: '6px 10px', borderRadius: '4px', fontSize: '0.8rem', width: '100%', boxSizing: 'border-box' }}
-                              />
+                            <div key={track.id ? `${track.id}-${idx}` : `fallback-track-${idx}-${track.title || 'beat'}`} style={{ display: 'grid', gridTemplateColumns: '30px 1.5fr 1.2fr 1fr 40px', gap: '8px', alignItems: 'center', backgroundColor: '#090d16', padding: '8px', borderRadius: '6px', border: '1px solid #1e293b' }}>
+                                <span style={{ fontSize: '0.85rem', color: '#94a3b8', textAlign: 'center', fontWeight: 'bold' }}>#{idx + 1}</span>
+                                <input 
+                                  type="text" 
+                                  placeholder="Track Title" 
+                                  value={track.title} 
+                                  onChange={(e) => updateTrackDetails(track.id, 'title', e.target.value)}
+                                  required
+                                  style={{ backgroundColor: '#0f172a', color: '#fff', border: '1px solid #334155', padding: '6px 10px', borderRadius: '4px', fontSize: '0.8rem', width: '100%', boxSizing: 'border-box' }}
+                                />
+                                <input 
+                                  type="text" 
+                                  placeholder="Composer" 
+                                  value={track.composer} 
+                                  onChange={(e) => updateTrackDetails(track.id, 'composer', e.target.value)}
+                                  required
+                                  style={{ backgroundColor: '#0f172a', color: '#fff', border: '1px solid #334155', padding: '6px 10px', borderRadius: '4px', fontSize: '0.8rem', width: '100%', boxSizing: 'border-box' }}
+                                />
                               <select 
                                 value={track.explicit} 
                                 onChange={(e) => updateTrackDetails(track.id, 'explicit', e.target.value)}

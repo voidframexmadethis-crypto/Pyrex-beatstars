@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Search, Upload, Music, Zap, BarChart3, Activity, ArrowRight, Play, CheckCircle2, ShieldCheck, ChevronRight } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 import SEO from '../components/SEO';
+import { getSafeKey } from '../lib/utils';
 
 const SonicSearchPage: React.FC = () => {
   const { state } = useStore();
@@ -36,7 +37,7 @@ const SonicSearchPage: React.FC = () => {
       setAnalysisResult({ bpm, key: detectedKey });
 
       // Match Catalog
-      const matchingBeats = beats.map(beat => {
+      const matchingBeats = beats.map((beat, index) => {
         const bpmMatch = 100 - Math.abs(beat.bpm - bpm);
         const keyMatch = beat.key === detectedKey ? 100 : 40;
         const score = Math.floor((bpmMatch + keyMatch) / 2);
@@ -205,44 +206,46 @@ const SonicSearchPage: React.FC = () => {
                 </div>
 
                 <div className="space-y-3">
-                  {matches.map((match) => (
-                    <motion.div 
-                      key={match.id}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      className="group bg-neutral-900/40 border border-neutral-800/50 hover:border-emerald-500/50 p-4 rounded-3xl flex items-center gap-6 transition-all"
-                    >
-                      <div className="w-16 h-16 rounded-2xl overflow-hidden shrink-0 border border-neutral-800">
-                        <img src={match.artworkUrl || match.coverArtUrl} alt="" className="w-full h-full object-cover" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-3 mb-1">
-                          <h4 className="text-lg font-black truncate">{match.title}</h4>
-                          <span className="text-[10px] font-black text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded uppercase tracking-widest border border-emerald-500/20">
-                            {match.matchScore}% Match
-                          </span>
+                  {matches && matches.map((match, index) => {
+                    return (
+                      <motion.div 
+                        key={getSafeKey(match, index, 'sonic-match')}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="group bg-neutral-900/40 border border-neutral-800/50 hover:border-emerald-500/50 p-4 rounded-3xl flex items-center gap-6 transition-all"
+                      >
+                        <div className="w-16 h-16 rounded-2xl overflow-hidden shrink-0 border border-neutral-800">
+                          <img src={match.artworkUrl || match.coverArtUrl} alt="" className="w-full h-full object-cover" />
                         </div>
-                        <div className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest flex gap-3">
-                          <span>{match.bpm} BPM</span>
-                          <span>•</span>
-                          <span>{match.key}</span>
-                          <span>•</span>
-                          <span className="text-neutral-700">.m4a Master</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-3 mb-1">
+                            <h4 className="text-lg font-black truncate">{match.title}</h4>
+                            <span className="text-[10px] font-black text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded uppercase tracking-widest border border-emerald-500/20">
+                              {match.matchScore}% Match
+                            </span>
+                          </div>
+                          <div className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest flex gap-3">
+                            <span>{match.bpm} BPM</span>
+                            <span>•</span>
+                            <span>{match.key}</span>
+                            <span>•</span>
+                            <span className="text-neutral-700">.m4a Master</span>
+                          </div>
                         </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <button className="w-12 h-12 bg-neutral-800 hover:bg-white hover:text-black rounded-2xl flex items-center justify-center transition-all">
-                          <Play className="w-5 h-5 fill-current" />
-                        </button>
-                        <button 
-                          onClick={() => window.location.hash = `#/beat/${match.id}`}
-                          className="w-12 h-12 bg-neutral-800 hover:bg-emerald-500 hover:text-black rounded-2xl flex items-center justify-center transition-all"
-                        >
-                          <ChevronRight className="w-6 h-6" />
-                        </button>
-                      </div>
-                    </motion.div>
-                  ))}
+                        <div className="flex items-center gap-2">
+                          <button className="w-12 h-12 bg-neutral-800 hover:bg-white hover:text-black rounded-2xl flex items-center justify-center transition-all">
+                            <Play className="w-5 h-5 fill-current" />
+                          </button>
+                          <button 
+                            onClick={() => window.location.hash = `#/beat/${match.id}`}
+                            className="w-12 h-12 bg-neutral-800 hover:bg-emerald-500 hover:text-black rounded-2xl flex items-center justify-center transition-all"
+                          >
+                            <ChevronRight className="w-6 h-6" />
+                          </button>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
                 </div>
               </section>
             </motion.div>

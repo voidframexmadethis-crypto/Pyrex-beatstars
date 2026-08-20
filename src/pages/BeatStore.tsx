@@ -16,18 +16,7 @@ export default function BeatStore() {
       }
     }
     // Default starting beats if nothing is saved yet
-    return [
-      {
-        id: 1,
-        title: "Costly",
-        bpm: 128,
-        key: "B Minor",
-        genre: "Trap",
-        price: 29.99,
-        audioUrl: "https://archive.org/download/test-audio-sample/sample.m4a",
-        artwork: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&auto=format&fit=crop&q=60"
-      }
-    ];
+    return [];
   });
 
   // Save to localStorage automatically whenever your beats array changes:
@@ -124,49 +113,52 @@ export default function BeatStore() {
 
         {/* Beat Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {beats.map((beat) => (
-            <div 
-              key={beat.id}
-              className="bg-[#140c22] border border-purple-500/20 rounded-2xl p-4 hover:border-purple-500/50 transition-all shadow-xl group flex flex-col justify-between"
-            >
-              <div>
-                {/* Artwork */}
-                <div className="relative aspect-square rounded-xl overflow-hidden mb-4 bg-black">
-                  <img 
-                    src={beat.artwork} 
-                    alt={beat.title} 
-                    className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
-                    loading="lazy"
-                  />
-                </div>
+          {beats && beats.map((track, index) => {
+            const uniqueKey = track.id ? `${track.id}-${index}` : `final-beat-item-${index}-${track.title || 'beat'}`;
+            return (
+              <div 
+                key={uniqueKey}
+                className="bg-[#140c22] border border-purple-500/20 rounded-2xl p-4 hover:border-purple-500/50 transition-all shadow-xl group flex flex-col justify-between"
+              >
+                <div>
+                  {/* Artwork */}
+                  <div className="relative aspect-square rounded-xl overflow-hidden mb-4 bg-black">
+                    <img 
+                      src={track.artwork || track.coverUrl} 
+                      alt={track.title} 
+                      className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
+                      loading="lazy"
+                    />
+                  </div>
 
-                {/* Title & Metadata */}
-                <div className="mb-4">
-                  <h3 className="font-bold text-lg text-white mb-1">{beat.title}</h3>
-                  <div className="flex flex-wrap items-center gap-2 text-xs text-purple-300/70">
-                    <span className="bg-purple-950 px-2 py-1 rounded-md">{beat.bpm} BPM</span>
-                    <span className="bg-purple-950 px-2 py-1 rounded-md">{beat.key}</span>
-                    <span className="bg-purple-950 px-2 py-1 rounded-md">{beat.genre}</span>
+                  {/* Title & Metadata */}
+                  <div className="mb-4">
+                    <h3 className="font-bold text-lg text-white mb-1">{track.title}</h3>
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-purple-300/70">
+                      <span className="bg-purple-950 px-2 py-1 rounded-md">{track.bpm || '140'} BPM</span>
+                      <span className="bg-purple-950 px-2 py-1 rounded-md">{track.key || 'C Minor'}</span>
+                      <span className="bg-purple-950 px-2 py-1 rounded-md">{track.genre || 'Trap'}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Price & Buy Action */}
-              <div className="flex items-center justify-between pt-3 border-t border-purple-500/10 mt-2">
-                <div>
-                  <p className="text-[10px] uppercase text-purple-400 font-semibold">Starting At</p>
-                  <p className="text-lg font-black text-purple-200">${Number(beat.price).toFixed(2)}</p>
+                {/* Price & Buy Action */}
+                <div className="flex items-center justify-between pt-3 border-t border-purple-500/10 mt-2">
+                  <div>
+                    <p className="text-[10px] uppercase text-purple-400 font-semibold">Starting At</p>
+                    <p className="text-lg font-black text-purple-200">${track.price ? Number(track.price).toFixed(2) : '49.99'}</p>
+                  </div>
+                  <button 
+                    id={`buy-license-btn-${track.id}`}
+                    onClick={() => handleOpenCheckout(track)}
+                    className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:opacity-90 active:scale-95 px-4 py-2.5 rounded-xl text-xs font-bold tracking-wider transition-all shadow-md text-white"
+                  >
+                    BUY / LICENSE
+                  </button>
                 </div>
-                <button 
-                  id={`buy-license-btn-${beat.id}`}
-                  onClick={() => handleOpenCheckout(beat)}
-                  className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:opacity-90 active:scale-95 px-4 py-2.5 rounded-xl text-xs font-bold tracking-wider transition-all shadow-md text-white"
-                >
-                  BUY / LICENSE
-                </button>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </main>
 

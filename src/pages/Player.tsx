@@ -473,9 +473,9 @@ export default function Player() {
           {/* Left: Large Square Artwork */}
           <div className="w-full lg:w-[450px] aspect-square rounded-2xl overflow-hidden relative shadow-[0_40px_100px_rgba(0,0,0,0.8)] border border-white/5 group bg-neutral-900">
             <img 
-              src={(currentBeat as any).artwork || currentBeat.coverArtUrl || '/mxbeatz_cover.jpg'} 
-              alt={displayTitle} 
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+              src={(currentBeat as any).artwork || (currentBeat as any).coverUrl || (currentBeat as any).imageUrl || currentBeat.coverArtUrl || '/mxbeatz_cover.jpg'} 
+              alt={displayTitle || "Custom Beat Artwork"} 
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 rounded-md" 
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-8">
               <h2 className="text-2xl font-black uppercase tracking-tighter text-white/90">{displayTitle}</h2>
@@ -570,11 +570,14 @@ export default function Player() {
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              {['Ambient Trap', 'Dark', 'Pyrex Spinna Style'].map((tag) => (
-                <span key={tag} className="bg-[#18181b] border border-white/5 text-neutral-300 text-[11px] font-bold px-5 py-2 rounded-full uppercase tracking-wider">
+              {['Ambient Trap', 'Dark', 'Pyrex Spinna Style'].map((tag, index) => {
+              const finalKey = `tag-${index}-${tag}`;
+              return (
+                <span key={finalKey} className="bg-[#18181b] border border-white/5 text-neutral-300 text-[11px] font-bold px-5 py-2 rounded-full uppercase tracking-wider">
                   {tag}
                 </span>
-              ))}
+              );
+            })}
             </div>
           </div>
         </div>
@@ -674,19 +677,24 @@ export default function Player() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
-                  {allBeats.slice(0, 20).map((beat) => {
+                  {allBeats.slice(0, 20).map((beat, idx) => {
+                    const finalKey = beat.id ? `${beat.id}-${idx}` : `final-beat-item-${idx}-${beat.title || 'beat'}`;
                     const isTrackActive = currentTrack?.id === beat.id;
                     const isTrackPlaying = isTrackActive && isPlaying;
                     return (
                       <tr 
-                        key={beat.id} 
+                        key={finalKey} 
                         onClick={() => togglePlayTrack(beat)}
                         className={`hover:bg-white/[0.04] transition-colors cursor-pointer group ${isTrackActive ? 'bg-purple-950/20' : ''}`}
                       >
                         <td className="py-4 px-4">
                           <div className="flex items-center gap-3">
                             <div className="relative w-10 h-10 bg-neutral-900 rounded-lg overflow-hidden shrink-0 border border-neutral-800">
-                              <img src={(beat as any).artwork || beat.coverArtUrl || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=100'} alt="" className="w-full h-full object-cover" />
+                              <img 
+                                src={(beat as any).artwork || (beat as any).coverUrl || (beat as any).imageUrl || beat.coverArtUrl || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=100'} 
+                                alt={beat.title || "Custom Beat Artwork"} 
+                                className="w-full h-full object-cover rounded-md" 
+                              />
                               <div className={`absolute inset-0 bg-black/50 flex items-center justify-center transition-opacity ${isTrackActive ? 'opacity-100 bg-purple-900/60' : 'opacity-0 group-hover:opacity-100'}`}>
                                 {isTrackPlaying ? (
                                   <Pause size={16} className="text-white fill-current" />
@@ -695,18 +703,19 @@ export default function Player() {
                                 )}
                               </div>
                             </div>
-                            <span className={`font-black uppercase truncate max-w-[280px] ${isTrackActive ? 'text-purple-400' : 'text-white group-hover:text-purple-300'}`}>
-                              {beat.title}
-                            </span>
+                            <h4 className="font-semibold text-white">
+                              {beat.title || "Untitled Track"}
+                            </h4>
                           </div>
                         </td>
                         <td className="py-4 px-4 font-mono font-bold text-neutral-400">{formatTime(beat.duration || 0)}</td>
                         <td className="py-4 px-4 font-mono font-bold text-neutral-400">{beat.bpm || 120} BPM</td>
                         <td className="py-4 px-4">
                           <div className="flex gap-1.5 flex-wrap">
-                            {(beat.tags || ['trap', 'dark']).slice(0, 2).map(t => (
-                              <span key={t} className="bg-neutral-800/80 px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase text-neutral-400">{t}</span>
-                            ))}
+                            {(beat.tags || ['trap', 'dark']).slice(0, 2).map((t, tIdx) => {
+                                const tagKey = `tag-${t}-${tIdx}`;
+                                return <span key={tagKey} className="bg-neutral-800/80 px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase text-neutral-400">{t}</span>
+                            })}
                           </div>
                         </td>
                         <td className="py-4 px-4 text-right">

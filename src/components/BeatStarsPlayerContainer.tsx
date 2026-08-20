@@ -40,7 +40,7 @@ export function BeatStarsPlayerContainer({
         <div className="flex flex-col md:flex-row items-start md:items-center gap-5">
           <img 
             src={artworkUrl} 
-            alt={trackTitle} 
+            alt={trackTitle || "Custom Beat Artwork"} 
             className="w-32 h-32 md:w-40 md:h-40 object-cover rounded shadow-md flex-shrink-0"
           />
           <div className="flex-1 min-w-0 space-y-2">

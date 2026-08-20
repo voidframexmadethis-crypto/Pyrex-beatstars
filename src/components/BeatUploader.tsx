@@ -3115,7 +3115,9 @@ const BeatUploader = React.memo(({ trackToEdit, onClose }: BeatUploaderProps) =>
                       )}
                     </div>
                     <div className="flex-1 text-center md:text-left">
-                      <h3 className="text-2xl font-bold">{formData.title || 'Untitled Track'}</h3>
+                      <h4 className="font-semibold text-white">
+                        {formData.title || "Untitled Track"}
+                      </h4>
                       <p className="text-indigo-400 font-medium mb-4">{formData.producer}</p>
                       
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm font-mono text-neutral-400">

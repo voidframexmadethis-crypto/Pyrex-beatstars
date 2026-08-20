@@ -99,8 +99,8 @@ const persistActiveTrackMetadata = (track: Beat | null) => {
       localStorage.setItem('pyrex_active_track_title', track.title);
     }
     localStorage.setItem('pyrex_active_track_producer', track.producer || 'Pyrex Spinna');
-    if (track.coverArtUrl) {
-      localStorage.setItem('pyrex_active_track_artwork', track.coverArtUrl);
+    if (track.coverArtUrl || track.artwork || track.coverUrl || track.imageUrl) {
+      localStorage.setItem('pyrex_active_track_artwork', track.artwork || track.coverUrl || track.imageUrl || track.coverArtUrl || '');
     }
   } catch (e) {
     console.warn("Storage write error for active track metadata:", e);
@@ -124,7 +124,7 @@ const loadInitialActiveTrack = (): Beat | null => {
     const id = parsed.id || localStorage.getItem('pyrex_active_track_id') || localStorage.getItem('pyrex_current_track_id') || '';
     const title = parsed.title || localStorage.getItem('pyrex_active_track_title') || '';
     const producer = parsed.producer || localStorage.getItem('pyrex_active_track_producer') || 'Pyrex Spinna';
-    const coverArtUrl = parsed.coverArtUrl || localStorage.getItem('pyrex_active_track_artwork') || '';
+    const coverArtUrl = parsed.artwork || parsed.coverUrl || parsed.imageUrl || parsed.coverArtUrl || localStorage.getItem('pyrex_active_track_artwork') || '';
 
     if (id || title) {
       return {
@@ -136,6 +136,9 @@ const loadInitialActiveTrack = (): Beat | null => {
         camelotCode: parsed.camelotCode,
         price: parsed.price || 0,
         coverArtUrl: coverArtUrl,
+        artwork: parsed.artwork || coverArtUrl,
+        coverUrl: parsed.coverUrl || coverArtUrl,
+        imageUrl: parsed.imageUrl || coverArtUrl,
         audioUrl: parsed.audioUrl || '',
         visibility: parsed.visibility || 'Public',
         trackType: parsed.trackType || 'Beat',

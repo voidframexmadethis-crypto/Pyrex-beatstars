@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import { filterHumanBeats } from '../lib/beatUtils';
 import BeatPackPreview from '../components/BeatPackPreview';
+import { getSafeKey } from '../lib/utils';
 
 export default function Feed() {
   const navigate = useNavigate();
@@ -279,6 +280,7 @@ export default function Feed() {
               </div>
             ) : (
               topRatedTracks.map((beat, index) => {
+                const safeKey = getSafeKey(beat, index, 'beat');
                 const isThisActive = currentTrack?.id === beat.id;
                 const isThisPlaying = isThisActive && isPlaying;
                 const isLiked = likedTracks[beat.id] || false;
@@ -289,7 +291,7 @@ export default function Feed() {
 
                 return (
                   <div 
-                    key={beat.id || index}
+                    key={safeKey}
                     className={`bg-neutral-900/80 border rounded-3xl p-6 backdrop-blur-xl shadow-2xl transition-all group ${
                       isThisActive 
                         ? 'border-purple-500/60 ring-1 ring-purple-500/30 shadow-purple-950/30' 

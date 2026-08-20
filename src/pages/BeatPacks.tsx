@@ -636,11 +636,12 @@ export default function BeatPacks() {
                     ? 'grid-cols-3' 
                     : 'grid-cols-2 sm:grid-cols-4'
             }`}>
-              {beatPacks.map((pack) => {
+              {beatPacks.map((pack, index) => {
+                const finalKey = pack.id ? `${pack.id}-${index}` : `final-pack-item-${index}-${pack.title || 'beat'}`;
                 const isSelected = pack.id === selectedPackId;
                 return (
                   <div 
-                    key={pack.id}
+                    key={finalKey}
                     onClick={() => handleSelectPack(pack.id)}
                     className="flex flex-col items-center cursor-pointer group relative"
                   >
@@ -789,6 +790,7 @@ export default function BeatPacks() {
               {/* Middle: Horizontal Segment Pills for Unlimited Tracks */}
               <div className="flex items-center gap-1.5 w-full max-w-lg flex-1 overflow-x-auto py-1 scrollbar-none">
                 {Array.from({ length: activePack.beats.length || activePack.beatCount || 1 }).map((_, index) => {
+                  const finalKey = `snippet-bar-${index}`;
                   const isPast = index < currentSnippetIndex;
                   const isCurrent = index === currentSnippetIndex;
                   const currentFillPercent = isCurrent 
@@ -797,7 +799,7 @@ export default function BeatPacks() {
 
                   return (
                     <div 
-                      key={index}
+                      key={finalKey}
                       onClick={() => {
                         if (isPreviewMode && activePack.beats[index]) {
                           setCurrentSnippetIndex(index);

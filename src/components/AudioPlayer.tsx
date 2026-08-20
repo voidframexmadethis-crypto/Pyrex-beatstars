@@ -2,7 +2,6 @@ import React from 'react';
 import { Play, Pause, Volume2, VolumeX, SkipBack, SkipForward, ShieldCheck } from 'lucide-react';
 import { useAudioPlayer } from '../context/AudioPlayerContext';
 import { AudioTagToggle } from './AudioTagToggle';
-import { sanitizeTitle } from '../utils/sanitizeTitle';
 
 export default function AudioPlayer() {
   const { 
@@ -78,14 +77,16 @@ export default function AudioPlayer() {
           <div className="col-span-7 md:col-span-4 flex items-center gap-2.5 sm:gap-3 min-w-0">
             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-neutral-900 border border-neutral-800 overflow-hidden shrink-0 shadow-lg">
               <img 
-                src={currentTrack.coverArtUrl || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=100'} 
-                alt={currentTrack.title}
-                className="w-full h-full object-cover"
+                src={currentTrack?.artwork || currentTrack?.coverUrl || currentTrack?.imageUrl} 
+                alt={currentTrack?.title || "Custom Beat Artwork"} 
+                className="w-full h-full object-cover rounded-md"
               />
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5 overflow-hidden">
-                <h4 className="text-xs sm:text-sm font-bold text-white truncate leading-tight">{sanitizeTitle(currentTrack.title)}</h4>
+                <h4 className="font-semibold text-white">
+                  {currentTrack?.title || "Untitled Track"}
+                </h4>
                 {offlineReadyTracks.has(currentTrack.id) && (
                   <div className="hidden lg:flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded text-[8px] font-bold text-emerald-500 uppercase tracking-wider shrink-0">
                     <ShieldCheck size={10} />

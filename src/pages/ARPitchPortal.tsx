@@ -107,28 +107,31 @@ const ARPitchPortal: React.FC = () => {
               Pitch Catalog
             </h3>
             <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-              {beats.map((beat) => (
-                <button
-                  key={beat.id}
-                  onClick={() => setSelectedTrack(beat)}
-                  className={`w-full text-left p-4 rounded-2xl border transition-all flex items-center gap-4 group ${
-                    selectedTrack?.id === beat.id 
-                      ? 'bg-purple-600 border-purple-500' 
-                      : 'bg-slate-950/50 border-slate-800 hover:border-slate-700'
-                  }`}
-                >
-                  <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 bg-slate-900">
-                    <img src={beat.artworkUrl || beat.coverArtUrl} alt="" className="w-full h-full object-cover" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-xs font-bold text-white truncate">{beat.title}</div>
-                    <div className="text-[10px] text-neutral-400 mt-0.5 uppercase tracking-widest group-hover:text-neutral-300">
-                      {beat.bpm} BPM • {beat.key}
+              {beats && beats.map((beat, index) => {
+                const finalKey = beat.id ? `${beat.id}-${index}` : `final-pitch-beat-${index}-${beat.title || 'beat'}`;
+                return (
+                  <button
+                    key={finalKey}
+                    onClick={() => setSelectedTrack(beat)}
+                    className={`w-full text-left p-4 rounded-2xl border transition-all flex items-center gap-4 group ${
+                      selectedTrack?.id === beat.id 
+                        ? 'bg-purple-600 border-purple-500' 
+                        : 'bg-slate-950/50 border-slate-800 hover:border-slate-700'
+                    }`}
+                  >
+                    <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 bg-slate-900">
+                      <img src={beat.artworkUrl || beat.coverArtUrl} alt="" className="w-full h-full object-cover" />
                     </div>
-                  </div>
-                  <ChevronRight className={`w-4 h-4 ${selectedTrack?.id === beat.id ? 'text-white' : 'text-neutral-700 group-hover:text-neutral-500'}`} />
-                </button>
-              ))}
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs font-bold text-white truncate">{beat.title}</div>
+                      <div className="text-[10px] text-neutral-400 mt-0.5 uppercase tracking-widest group-hover:text-neutral-300">
+                        {beat.bpm} BPM • {beat.key}
+                      </div>
+                    </div>
+                    <ChevronRight className={`w-4 h-4 ${selectedTrack?.id === beat.id ? 'text-white' : 'text-neutral-700 group-hover:text-neutral-500'}`} />
+                  </button>
+                );
+              })}
             </div>
           </section>
         </div>
@@ -190,13 +193,16 @@ const ARPitchPortal: React.FC = () => {
                   <div className="h-24 bg-slate-950/80 rounded-2xl border border-slate-800 flex items-center justify-center p-4 relative group">
                     {/* Simulated Waveform Visualizer */}
                     <div className="flex items-end gap-1 h-full w-full">
-                      {[...Array(60)].map((_, i) => (
-                        <div 
-                          key={i} 
-                          className={`flex-1 rounded-full transition-all bg-neutral-800 group-hover:bg-purple-600/40`}
-                          style={{ height: `${Math.random() * 80 + 20}%` }}
-                        />
-                      ))}
+                      {[...Array(60)].map((_, i) => {
+                        const finalKey = `waveform-bar-${i}`;
+                        return (
+                          <div 
+                            key={finalKey} 
+                            className={`flex-1 rounded-full transition-all bg-neutral-800 group-hover:bg-purple-600/40`}
+                            style={{ height: `${Math.random() * 80 + 20}%` }}
+                          />
+                        );
+                    })}
                     </div>
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
                       <button className="w-12 h-12 bg-white text-black rounded-full flex items-center justify-center shadow-xl transform scale-110">

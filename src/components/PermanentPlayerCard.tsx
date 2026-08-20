@@ -149,8 +149,8 @@ export default function PermanentPlayerCard({ beat }: PermanentPlayerCardProps) 
         {/* Artwork Container with Discount Badge */}
         <div className="art-container relative w-[70px] h-[70px] flex-shrink-0">
           <img 
-            src={(beat as any).artwork || beat.coverArtUrl || beat.backupArtworkUrl || beat.r2ArtworkUrl || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&auto=format&fit=crop&q=60'} 
-            alt="Pyrex Spinna Beat Artwork" 
+            src={(beat as any).artwork || (beat as any).coverUrl || (beat as any).imageUrl || beat.coverArtUrl || beat.backupArtworkUrl || beat.r2ArtworkUrl || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&auto=format&fit=crop&q=60'} 
+            alt={beat.title || "Custom Beat Artwork"} 
             className="player-art w-full h-full object-cover rounded-xl border border-white/8"
             loading="lazy"
             referrerPolicy="no-referrer"
@@ -169,14 +169,14 @@ export default function PermanentPlayerCard({ beat }: PermanentPlayerCardProps) 
               <span className="artist-tag text-[0.75rem] text-[#38bdf8] font-semibold uppercase tracking-[0.05em] truncate">
                 {beat.producer || 'Pyrex Spinna'}
               </span>
-              <h3 className="track-title m-0 text-[1rem] text-[#f8fafc] font-bold truncate flex items-center gap-2">
-                {sanitizeTitle(beat.title)}
+              <h4 className="font-semibold text-white">
+                {beat.title || "Untitled Track"}
                 {beat.isAIFree && (
-                  <div className="flex items-center gap-1 text-[8px] text-emerald-400 border border-emerald-400/20 bg-emerald-400/5 px-1.5 py-0.5 rounded uppercase font-black tracking-tighter">
+                  <div className="flex items-center gap-1 text-[8px] text-emerald-400 border border-emerald-400/20 bg-emerald-400/5 px-1.5 py-0.5 rounded uppercase font-black tracking-tighter ml-2 inline-flex">
                     <ShieldCheck size={8} /> AI-FREE
                   </div>
                 )}
-              </h3>
+              </h4>
               <div className="flex items-center gap-2 mt-1">
                 <div className="flex items-center gap-1 px-1.5 py-0.5 bg-neutral-900 border border-neutral-800 rounded text-[9px] font-black text-neutral-400 uppercase tracking-wider">
                   <Activity size={10} className="text-purple-500" />

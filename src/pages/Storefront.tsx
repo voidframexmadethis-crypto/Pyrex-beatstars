@@ -20,6 +20,7 @@ import BeatPackPreview from '../components/BeatPackPreview';
 import AdvancedFeaturesSection from '../components/AdvancedFeaturesSection';
 import { LicenseCalculator } from '../components/LicenseCalculator';
 import { filterHumanBeats, isAIPlaceholderBeat, downloadAudioFile, getUniqueBeats } from '../lib/beatUtils';
+import { getSafeKey } from '../lib/utils';
 import { sanitizeTitle } from '../utils/sanitizeTitle';
 import { generateAndDownloadLicense } from '../utils/contractGenerator';
 
@@ -326,8 +327,11 @@ export default function Storefront() {
              </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {permanentBeats.map(beat => (
-              <PermanentPlayerCard key={beat.id} beat={beat} />
+            {permanentBeats.map((track, index) => (
+              <PermanentPlayerCard 
+                key={getSafeKey(track, index, 'permanent-beat')} 
+                beat={track} 
+              />
             ))}
           </div>
         </section>
@@ -371,101 +375,98 @@ export default function Storefront() {
             ref={collectionScrollRef}
             className="flex overflow-x-auto gap-6 pb-4 pt-2 scrollbar-thin scrollbar-thumb-neutral-800 scrollbar-track-transparent scroll-smooth snap-x"
           >
-            {regularBeats.map((beat, idx) => (
+            {regularBeats.map((track, index) => (
               <div 
-                key={`circ-${beat.id || idx}`}
+                key={getSafeKey(track, index, 'circular-beat')}
                 className="flex-shrink-0 snap-start flex flex-col items-center group relative"
               >
-                {/* CIRCULAR ARTWORK CONTAINER */}
-                <div className="relative w-52 h-52 sm:w-56 sm:h-56 rounded-full overflow-hidden shadow-2xl border-2 border-neutral-800 group-hover:border-indigo-500 transition-all duration-300 transform group-hover:scale-105">
-                  {beat.coverArtUrl ? (
-                    <img 
-                      src={beat.coverArtUrl} 
-                      alt={beat.title} 
-                      className="w-full h-full object-cover rounded-full group-hover:scale-110 transition-transform duration-500" 
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-indigo-900 via-neutral-900 to-black flex items-center justify-center text-neutral-600 rounded-full">
-                      <Music size={44} />
-                    </div>
-                  )}
-
-                  {/* CENTER OVERLAY: PLAY BUTTON + BEAT TITLE + BPM */}
-                  <div className="absolute inset-0 bg-black/60 group-hover:bg-black/75 transition-colors duration-300 rounded-full flex flex-col items-center justify-center p-4 text-center select-none backdrop-blur-[2px]">
-                    {/* Play Button in the middle */}
-                    <button
-                      onClick={() => handleTogglePlay(beat)}
-                      className="w-12 h-12 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white flex items-center justify-center shadow-lg transition-transform active:scale-90 mb-2 group-hover:scale-110"
-                      title={isPlaying(beat.id) ? "Pause" : "Play"}
-                    >
-                      {isPlaying(beat.id) ? (
-                        <Pause size={22} className="fill-current text-white" />
-                      ) : (
-                        <Play size={22} className="fill-current text-white ml-0.5" />
-                      )}
-                    </button>
-
-                    {/* Name of the beat in the middle */}
-                    <h3 className="font-extrabold text-white text-sm sm:text-base leading-snug truncate max-w-[85%] drop-shadow flex items-center justify-center gap-1.5">
-                      {sanitizeTitle(beat.title)}
-                      {beat.isPermanent && (
-                        <span className="bg-indigo-500/30 text-indigo-300 text-[8px] px-1.5 py-0.5 rounded border border-indigo-500/40 font-black tracking-tighter">PERMANENT</span>
-                      )}
-                    </h3>
-
-                    {/* BPM in the middle */}
-                    <span className="text-[11px] font-bold text-indigo-300 mt-1 bg-black/80 px-2.5 py-0.5 rounded-full border border-indigo-500/30">
-                      {beat.bpm || 120} BPM
-                    </span>
-                  </div>
-                </div>
-
-                {/* Producer & Purchase Actions underneath the circle */}
-                <div className="mt-3 text-center flex flex-col items-center">
-                  <p className="text-xs text-neutral-400 font-medium truncate max-w-[180px]">{beat.producer}</p>
-                  <div className="flex items-center gap-2 mt-2">
-                    <button 
-                      onClick={() => (isCelebrationMode || beat.freeDownload?.enabled) ? handleFreeDownload(beat) : handlePurchase(beat)} 
-                      className="transition-all active:scale-95"
-                    >
-                      <div className={`${(isCelebrationMode || beat.freeDownload?.enabled) ? '!bg-emerald-600/20 !border-emerald-500/30 !text-emerald-400' : ''} beat-price-tag gap-1.5`}>
-                        {(isCelebrationMode || beat.freeDownload?.enabled) ? <Download size={12} /> : <ShoppingCart size={12} />}
-                        <span>{(isCelebrationMode || beat.freeDownload?.enabled) ? 'FREE DOWNLOAD (.M4A)' : `$${Number(beat.price).toFixed(2)}`}</span>
+                  {/* CIRCULAR ARTWORK CONTAINER */}
+                  <div className="relative w-52 h-52 sm:w-56 sm:h-56 rounded-full overflow-hidden shadow-2xl border-2 border-neutral-800 group-hover:border-indigo-500 transition-all duration-300 transform group-hover:scale-105">
+                    { (track.coverArtUrl || track.artwork || track.coverUrl || track.imageUrl) ? (
+                      <img 
+                        src={track.artwork || track.coverUrl || track.imageUrl || track.coverArtUrl} 
+                        alt={track.title || "Custom Beat Artwork"} 
+                        className="w-full h-full object-cover rounded-full group-hover:scale-110 transition-transform duration-500" 
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-indigo-900 via-neutral-900 to-black flex items-center justify-center text-neutral-600 rounded-full">
+                        <Music size={44} />
                       </div>
-                    </button>
-                    <button 
-                      onClick={() => handleShareBeat(beat)}
-                      className="w-8 h-8 rounded-full bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white hover:border-indigo-500 flex items-center justify-center transition-all active:scale-90"
-                      title="Share Beat"
-                    >
-                      <Share2 size={12} />
-                    </button>
-                    {isAdmin && (
-                      <>
-                        <button 
-                          onClick={() => setTrackToEdit(beat)}
-                          className="w-8 h-8 rounded-full bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-indigo-400 hover:border-indigo-500 flex items-center justify-center transition-all active:scale-90"
-                          title="Edit Beat"
-                        >
-                          <Edit size={12} />
-                        </button>
-                        <button 
-                          onClick={async () => {
-                            if (window.confirm(`Are you sure you want to permanently delete "${beat.title}"?`)) {
-                              await removeBeat(beat.id);
-                            }
-                          }}
-                          className="w-8 h-8 rounded-full bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-rose-500 hover:border-rose-500 flex items-center justify-center transition-all active:scale-90"
-                          title="Delete Beat"
-                          id={`storefront-circular-delete-${beat.id}`}
-                        >
-                          <Trash2 size={12} />
-                        </button>
-                      </>
                     )}
+
+                    {/* CENTER OVERLAY: PLAY BUTTON + BEAT TITLE + BPM */}
+                    <div className="absolute inset-0 bg-black/60 group-hover:bg-black/75 transition-colors duration-300 rounded-full flex flex-col items-center justify-center p-4 text-center select-none backdrop-blur-[2px]">
+                      {/* Play Button in the middle */}
+                      <button
+                        onClick={() => handleTogglePlay(track)}
+                        className="w-12 h-12 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white flex items-center justify-center shadow-lg transition-transform active:scale-90 mb-2 group-hover:scale-110"
+                        title={isPlaying(track.id) ? "Pause" : "Play"}
+                      >
+                        {isPlaying(track.id) ? (
+                          <Pause size={22} className="fill-current text-white" />
+                        ) : (
+                          <Play size={22} className="fill-current text-white ml-0.5" />
+                        )}
+                      </button>
+
+                      {/* Name of the beat in the middle */}
+                      <h4 className="font-semibold text-white">
+                        {track.title || "Untitled Track"}
+                      </h4>
+
+                      {/* BPM in the middle */}
+                      <span className="text-[11px] font-bold text-indigo-300 mt-1 bg-black/80 px-2.5 py-0.5 rounded-full border border-indigo-500/30">
+                        {track.bpm || 120} BPM
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Producer & Purchase Actions underneath the circle */}
+                  <div className="mt-3 text-center flex flex-col items-center">
+                    <p className="text-xs text-neutral-400 font-medium truncate max-w-[180px]">{track.producer}</p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <button 
+                        onClick={() => (isCelebrationMode || track.freeDownload?.enabled) ? handleFreeDownload(track) : handlePurchase(track)} 
+                        className="transition-all active:scale-95"
+                      >
+                        <div className={`${(isCelebrationMode || track.freeDownload?.enabled) ? '!bg-emerald-600/20 !border-emerald-500/30 !text-emerald-400' : ''} beat-price-tag gap-1.5`}>
+                          {(isCelebrationMode || track.freeDownload?.enabled) ? <Download size={12} /> : <ShoppingCart size={12} />}
+                          <span>{(isCelebrationMode || track.freeDownload?.enabled) ? 'FREE DOWNLOAD (.M4A)' : `$${track.price ? Number(track.price).toFixed(2) : '49.99'}`}</span>
+                        </div>
+                      </button>
+                      <button 
+                        onClick={() => handleShareBeat(track)}
+                        className="w-8 h-8 rounded-full bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white hover:border-indigo-500 flex items-center justify-center transition-all active:scale-90"
+                        title="Share Beat"
+                      >
+                        <Share2 size={12} />
+                      </button>
+                      {isAdmin && (
+                        <>
+                          <button 
+                            onClick={() => setTrackToEdit(track)}
+                            className="w-8 h-8 rounded-full bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-indigo-400 hover:border-indigo-500 flex items-center justify-center transition-all active:scale-90"
+                            title="Edit Beat"
+                          >
+                            <Edit size={12} />
+                          </button>
+                          <button 
+                            onClick={async () => {
+                              if (window.confirm(`Are you sure you want to permanently delete "${track.title}"?`)) {
+                                await removeBeat(track.id);
+                              }
+                            }}
+                            className="w-8 h-8 rounded-full bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-rose-500 hover:border-rose-500 flex items-center justify-center transition-all active:scale-90"
+                            title="Delete Beat"
+                            id={`storefront-circular-delete-${track.id}`}
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
             ))}
           </div>
         </section>
@@ -486,55 +487,62 @@ export default function Storefront() {
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-            {regularBeats.map((beat, idx) => (
-              <div key={beat.id ? `${beat.id}-${idx}` : idx} className="bg-neutral-900 rounded-lg overflow-hidden border border-neutral-800 group">
-                <div className="relative aspect-square">
-                  {beat.coverArtUrl ? (
-                    <img src={beat.coverArtUrl} alt={beat.title} className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full bg-neutral-800 flex items-center justify-center text-neutral-500"><Music size={32} /></div>
-                  )}
-                  <button 
-                    onClick={() => handleTogglePlay(beat)}
-                    className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    {isPlaying(beat.id) ? <Pause size={48} className="text-white" /> : <Play size={48} className="text-white" />}
-                  </button>
+            {regularBeats.map((track, index) => (
+              <div 
+                key={getSafeKey(track, index, 'trending-beat')} 
+                className="bg-neutral-900 rounded-lg overflow-hidden border border-neutral-800 group"
+              >
+                  <div className="relative aspect-square">
+                    { (track.artwork || track.coverUrl || track.imageUrl || track.coverArtUrl) ? (
+                      <img 
+                        src={track.artwork || track.coverUrl || track.imageUrl || track.coverArtUrl} 
+                        alt={track.title || "Custom Beat Artwork"} 
+                        className="w-full h-full object-cover rounded-md" 
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-neutral-800 flex items-center justify-center text-neutral-500"><Music size={32} /></div>
+                    )}
+                    <button 
+                      onClick={() => handleTogglePlay(track)}
+                      className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      {isPlaying(track.id) ? <Pause size={48} className="text-white" /> : <Play size={48} className="text-white" />}
+                    </button>
                   
                   {/* Overlay stats */}
                   <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/80 to-transparent flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity">
                     <div className="flex items-center gap-3 text-[10px] font-bold text-white/80">
-                      <span className="flex items-center gap-1"><Play size={10} /> {beat.plays || 0}</span>
-                      <span className="flex items-center gap-1"><ThumbsUp size={10} /> {beat.likes || 0}</span>
+                      <span className="flex items-center gap-1"><Play size={10} /> {track.plays || 0}</span>
+                      <span className="flex items-center gap-1"><ThumbsUp size={10} /> {track.likes || 0}</span>
                     </div>
                   </div>
                 </div>
                 <div className="p-4">
                   <div className="flex justify-between items-start mb-1">
                     <div className="flex flex-col flex-1 min-w-0">
-                      <h3 className="font-bold truncate flex items-center gap-2">
-                        {sanitizeTitle(beat.title)}
-                        {beat.isPermanent && (
-                          <span className="bg-indigo-500/20 text-indigo-400 text-[9px] px-1.5 py-0.5 rounded border border-indigo-500/30 font-bold tracking-tighter">PERMANENT</span>
+                      <h4 className="font-semibold text-white">
+                        {track.title || "Untitled Track"}
+                        {track.isPermanent && (
+                          <span className="bg-indigo-500/20 text-indigo-400 text-[9px] px-1.5 py-0.5 rounded border border-indigo-500/30 font-bold tracking-tighter ml-2">PERMANENT</span>
                         )}
-                      </h3>
+                      </h4>
                       <div className="flex items-center gap-2 mt-1">
                         <div className="flex items-center gap-1 text-[9px] font-bold text-neutral-500 uppercase tracking-tighter">
                           <Activity size={10} className="text-purple-500" />
-                          {beat.bpm} BPM
+                          {track.bpm} BPM
                         </div>
                         <div className="flex items-center gap-1 text-[9px] font-bold text-neutral-500 uppercase tracking-tighter">
                           <Music size={10} className="text-blue-500" />
-                          {beat.key}
+                          {track.key}
                         </div>
-                        {beat.camelotCode && (
+                        {track.camelotCode && (
                           <div className="flex items-center gap-1 text-[9px] font-black text-indigo-400 uppercase tracking-tighter bg-neutral-950 px-1.5 py-0.5 rounded border border-neutral-800">
-                            {beat.camelotCode}
+                            {track.camelotCode}
                           </div>
                         )}
                       </div>
                       <div className="flex items-center gap-1.5 mt-1">
-                        {beat.isAIFree && (
+                        {track.isAIFree && (
                           <div className="flex items-center gap-1 px-1.5 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded text-[8px] font-black uppercase tracking-tighter">
                             <ShieldCheck size={8} /> AI-FREE VERIFIED
                           </div>
@@ -542,28 +550,28 @@ export default function Storefront() {
                       </div>
                     </div>
                     <button 
-                      onClick={() => handleLike(beat)}
+                      onClick={() => handleLike(track)}
                       className="text-neutral-500 hover:text-indigo-400 transition-colors ml-2"
                     >
                       <ThumbsUp size={16} />
                     </button>
                   </div>
-                  <p className="text-sm text-neutral-400 mb-4 truncate">{beat.producer}</p>
+                  <p className="text-sm text-neutral-400 mb-4 truncate">{track.producer}</p>
                   
                   <div className="flex justify-between items-center">
                     <button 
-                      onClick={() => (isCelebrationMode || beat.freeDownload?.enabled) ? handleFreeDownload(beat) : handlePurchase(beat)} 
+                      onClick={() => (isCelebrationMode || track.freeDownload?.enabled) ? handleFreeDownload(track) : handlePurchase(track)} 
                       className="transition-all active:scale-95"
                     >
-                      <div className={`${(isCelebrationMode || beat.freeDownload?.enabled) ? '!bg-emerald-600/20 !border-emerald-500/30 !text-emerald-400' : ''} beat-price-tag gap-1`}>
-                        {(isCelebrationMode || beat.freeDownload?.enabled) ? <Download size={14} /> : <ShoppingCart size={14} />}
-                        <span>{(isCelebrationMode || beat.freeDownload?.enabled) ? 'FREE DOWNLOAD (TAGGED .M4A)' : `$${Number(beat.price).toFixed(2)}`}</span>
+                      <div className={`${(isCelebrationMode || track.freeDownload?.enabled) ? '!bg-emerald-600/20 !border-emerald-500/30 !text-emerald-400' : ''} beat-price-tag gap-1`}>
+                        {(isCelebrationMode || track.freeDownload?.enabled) ? <Download size={14} /> : <ShoppingCart size={14} />}
+                        <span>{(isCelebrationMode || track.freeDownload?.enabled) ? 'FREE DOWNLOAD (TAGGED .M4A)' : `$${track.price ? Number(track.price).toFixed(2) : '49.99'}`}</span>
                       </div>
                     </button>
                     <div className="flex items-center gap-3">
-                      {(beat.freeDownload?.enabled || isCelebrationMode) && (
+                      {(track.freeDownload?.enabled || isCelebrationMode) && (
                         <button 
-                          onClick={() => handleFreeDownload(beat)} 
+                          onClick={() => handleFreeDownload(track)} 
                           className="text-neutral-400 hover:text-white transition-colors"
                           title="Download"
                         >
@@ -571,7 +579,7 @@ export default function Storefront() {
                         </button>
                       )}
                       <button 
-                        onClick={() => handleShareBeat(beat)}
+                        onClick={() => handleShareBeat(track)}
                         className="text-neutral-400 hover:text-white transition-colors"
                         title="Share Beat"
                       >
@@ -580,7 +588,7 @@ export default function Storefront() {
                       {isAdmin && (
                         <>
                           <button 
-                            onClick={() => setTrackToEdit(beat)}
+                            onClick={() => setTrackToEdit(track)}
                             className="text-neutral-400 hover:text-indigo-400 transition-colors"
                             title="Edit Beat"
                           >
@@ -588,13 +596,13 @@ export default function Storefront() {
                           </button>
                           <button 
                             onClick={async () => {
-                              if (window.confirm(`Are you sure you want to permanently delete "${beat.title}"?`)) {
-                                await removeBeat(beat.id);
+                              if (window.confirm(`Are you sure you want to permanently delete "${track.title}"?`)) {
+                                await removeBeat(track.id);
                               }
                             }}
                             className="text-neutral-400 hover:text-rose-500 transition-colors"
                             title="Delete Beat"
-                            id={`storefront-trending-delete-${beat.id}`}
+                            id={`storefront-trending-delete-${track.id}`}
                           >
                             <Trash2 size={16} />
                           </button>

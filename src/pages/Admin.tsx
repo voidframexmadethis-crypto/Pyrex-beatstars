@@ -657,22 +657,25 @@ export default function Admin() {
                       </td>
                     </tr>
                   ) : (
-                    state.beats.filter(b => (b.earnings || 0) > 0).map(beat => (
-                      <tr key={beat.id} className="hover:bg-neutral-900/50">
-                        <td className="px-4 py-3 font-medium text-white flex items-center gap-3">
-                          <img src={beat.coverArtUrl} alt="" className="w-8 h-8 rounded object-cover" />
-                          {beat.title}
-                        </td>
-                        <td className="px-4 py-3 font-mono text-indigo-400">WAV / Trackout Lease</td>
-                        <td className="px-4 py-3 font-mono text-emerald-400 font-bold">${beat.earnings?.toFixed(2)}</td>
-                        <td className="px-4 py-3">
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                            COMPLETED
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-right text-neutral-400 font-mono text-xs">Today</td>
-                      </tr>
-                    ))
+                    state.beats.filter(b => (b.earnings || 0) > 0).map((beat, idx) => {
+                      const safeKey = beat.id ? `${beat.id}-${idx}` : `safe-beat-${idx}`;
+                      return (
+                        <tr key={safeKey} className="hover:bg-neutral-900/50">
+                          <td className="px-4 py-3 font-medium text-white flex items-center gap-3">
+                            <img src={beat.coverArtUrl} alt="" className="w-8 h-8 rounded object-cover" />
+                            {beat.title}
+                          </td>
+                          <td className="px-4 py-3 font-mono text-indigo-400">WAV / Trackout Lease</td>
+                          <td className="px-4 py-3 font-mono text-emerald-400 font-bold">${beat.earnings?.toFixed(2)}</td>
+                          <td className="px-4 py-3">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                              COMPLETED
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-right text-neutral-400 font-mono text-xs">Today</td>
+                        </tr>
+                      );
+                    })
                   )}
                 </tbody>
               </table>
@@ -768,25 +771,28 @@ export default function Admin() {
                       </td>
                     </tr>
                   ) : (
-                    state.beats.map((beat) => (
-                      <tr key={beat.id} className="hover:bg-neutral-900/50">
-                        <td className="px-4 py-3 font-medium text-white flex items-center gap-3">
-                          <img src={beat.coverArtUrl} alt="" className="w-8 h-8 rounded object-cover" />
-                          <div>
-                            <div>{beat.title}</div>
-                            <div className="text-[10px] text-neutral-500 font-mono">{beat.id}</div>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3 font-mono text-neutral-400">{beat.bpm || '140'} BPM • {beat.key || 'Am'}</td>
-                        <td className="px-4 py-3 font-mono text-white font-bold">{beat.plays || 0}</td>
-                        <td className="px-4 py-3 font-mono text-rose-400">{beat.likes || 0}</td>
-                        <td className="px-4 py-3 text-right">
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-                            HIGH
-                          </span>
-                        </td>
-                      </tr>
-                    ))
+                    state.beats.map((beat, idx) => {
+                      const safeKey = beat.id ? `${beat.id}-${idx}` : `safe-beat-${idx}`;
+                      return (
+                        <tr key={safeKey} className="hover:bg-neutral-900/50">
+                          <td className="px-4 py-3 font-medium text-white flex items-center gap-3">
+                            <img src={beat.coverArtUrl} alt="" className="w-8 h-8 rounded object-cover" />
+                            <div>
+                              <div>{beat.title}</div>
+                              <div className="text-[10px] text-neutral-500 font-mono">{beat.id}</div>
+                            </div>
+                          </td>
+                          <td className="px-4 py-3 font-mono text-neutral-400">{beat.bpm || '140'} BPM • {beat.key || 'Am'}</td>
+                          <td className="px-4 py-3 font-mono text-white font-bold">{beat.plays || 0}</td>
+                          <td className="px-4 py-3 font-mono text-rose-400">{beat.likes || 0}</td>
+                          <td className="px-4 py-3 text-right">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                              HIGH
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })
                   )}
                 </tbody>
               </table>
@@ -853,8 +859,8 @@ export default function Admin() {
                       </td>
                     </tr>
                   ) : (
-                    state.beats.map((beat) => (
-                      <tr key={beat.id} className="hover:bg-neutral-900/50 group">
+                    state.beats.map((beat, idx) => (
+                      <tr key={`${beat.id || 'beat'}-${idx}`} className="hover:bg-neutral-900/50 group">
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-3">
                             <img src={beat.coverArtUrl} alt="" className="w-10 h-10 rounded object-cover border border-neutral-800" />

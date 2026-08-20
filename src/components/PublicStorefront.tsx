@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import CustomPlayer from './CustomPlayer'; // Your boulevard audio player component
+import { getSafeKey } from '../lib/utils';
 
 export default function PublicStorefront({ beats }: { beats: any[] }) {
   return (
@@ -24,7 +25,7 @@ export default function PublicStorefront({ beats }: { beats: any[] }) {
             Feed empty. Waiting for the first banger... 🔴
           </div>
         ) : (
-          beats.map((beat, index) => <CustomPlayer key={index} beat={beat} />)
+          beats.map((beat, index) => <CustomPlayer key={getSafeKey(beat, index, 'storefront-beat')} beat={beat} />)
         )}
       </div>
     </div>

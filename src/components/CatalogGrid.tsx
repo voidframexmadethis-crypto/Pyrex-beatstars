@@ -4,6 +4,7 @@ import { useAudioPlayer } from '../context/AudioPlayerContext';
 import { getUniqueBeats } from '../lib/beatUtils';
 import { CustomRequestModal } from './CustomRequestModal';
 import { Target } from 'lucide-react';
+import { getSafeKey } from '../lib/utils';
 
 export default function CatalogGrid() {
     const { state } = useStore();
@@ -17,8 +18,8 @@ export default function CatalogGrid() {
     if (state.isLoading) {
         return (
             <div id="catalogGrid" className="catalog-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[1, 2, 3, 4, 5, 6].map((n) => (
-                    <div key={n} className="beat-card bg-[#0e0e10] border border-[#1c1c1f] rounded-lg p-4 animate-pulse">
+                {[1, 2, 3, 4, 5, 6].map((n, index) => (
+                    <div key={`loading-skeleton-${index}-${n}`} className="beat-card bg-[#0e0e10] border border-[#1c1c1f] rounded-lg p-4 animate-pulse">
                         <div className="w-full h-40 mb-4 bg-neutral-800 rounded-xl" />
                         <div className="h-6 bg-neutral-800 rounded w-3/4 mb-2" />
                         <div className="h-4 bg-neutral-800 rounded w-1/2 mb-4" />
@@ -43,59 +44,63 @@ export default function CatalogGrid() {
 
     return (
         <div id="catalogGrid" className="catalog-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {Array.isArray(tracks) && tracks.map((track) => (
-                <div key={track.id} className="beat-card bg-[#0e0e10] border border-[#1c1c1f] rounded-lg p-4" data-audio-url={track.audioUrl}>
-                    <div className="w-full h-40 mb-4 overflow-hidden rounded-xl">
-                        <img 
-                          src={(track as any).artwork || track.coverArtUrl || track.backupArtworkUrl || track.r2ArtworkUrl || (track as any).artworkUrl || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&auto=format&fit=crop&q=60'} 
-                          alt={track.title} 
-                          className="w-full h-full object-cover" 
-                          loading="lazy"
-                          referrerPolicy="no-referrer"
-                          onError={(e) => {
-                            (e.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&auto=format&fit=crop&q=60';
-                          }}
-                        />
-                    </div>
-                    <div className="beat-title text-lg font-bold mb-1 text-white">{track.title}</div>
-                    <div className="beat-meta text-sm text-neutral-400 mb-4">
-                        <span>{track.bpm || '140'} BPM</span> • <span>Key: {track.key || 'C Min'}</span>
-                    </div>
-                    <div className="card-actions flex gap-2">
-                        <button 
-                            onClick={() => playTrack(track)}
-                            className="play-pause-btn flex-1 bg-indigo-600 text-white py-2 rounded font-bold hover:bg-indigo-500 transition-all cursor-pointer"
-                        >
-                            Stream
-                        </button>
-                        <button 
-                            className="checkout-btn flex-1 border border-indigo-600 text-indigo-400 py-2 rounded font-bold hover:bg-indigo-600 hover:text-white transition-all cursor-pointer" 
-                            data-beat-id={track.id} 
-                            data-price={track.price}
-                        >
-                            ${track.price} License
-                        </button>
-                        <button 
-                            onClick={() => setInquiryBeat(track)}
-                            className="p-2 border border-neutral-800 rounded text-neutral-400 hover:text-indigo-400 hover:border-indigo-500/30 transition-colors"
-                            title="Custom Request"
-                        >
-                            <Target size={18} />
-                        </button>
-                        {localStorage.getItem('KRYPSIDE_ADMIN_AUTH') === 'true' && (
+            {Array.isArray(tracks) && tracks.map((track, idx) => {
+                return (
+                    <div key={getSafeKey(track, idx, 'catalog-beat')} className="beat-card bg-[#0e0e10] border border-[#1c1c1f] rounded-lg p-4" data-audio-url={track.audioUrl}>
+                        <div className="w-full h-40 mb-4 overflow-hidden rounded-xl">
+                            <img 
+                              src={(track as any).artwork || track.coverUrl || (track as any).imageUrl || track.coverArtUrl || track.backupArtworkUrl || track.r2ArtworkUrl || (track as any).artworkUrl || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&auto=format&fit=crop&q=60'} 
+                              alt={track.title || "Custom Beat Artwork"} 
+                              className="w-full h-full object-cover rounded-md" 
+                              loading="lazy"
+                              referrerPolicy="no-referrer"
+                              onError={(e) => {
+                                (e.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&auto=format&fit=crop&q=60';
+                              }}
+                            />
+                        </div>
+                        <h4 className="font-semibold text-white">
+                          {track.title || "Untitled Track"}
+                        </h4>
+                        <div className="beat-meta text-sm text-neutral-400 mb-4">
+                            <span>{track.bpm || '140'} BPM</span> • <span>Key: {track.key || 'C Min'}</span>
+                        </div>
+                        <div className="card-actions flex gap-2">
                             <button 
-                                onClick={() => {
-                                    window.location.href = `/admin-portal?edit=${track.id}`;
-                                }}
-                                className="p-2 border border-neutral-800 rounded text-neutral-400 hover:text-indigo-400"
-                                title="Edit in Admin Portal"
+                                onClick={() => playTrack(track)}
+                                className="play-pause-btn flex-1 bg-indigo-600 text-white py-2 rounded font-bold hover:bg-indigo-500 transition-all cursor-pointer"
                             >
-                                ⚙️
+                                Stream
                             </button>
-                        )}
+                            <button 
+                                className="checkout-btn flex-1 border border-indigo-600 text-indigo-400 py-2 rounded font-bold hover:bg-indigo-600 hover:text-white transition-all cursor-pointer" 
+                                data-beat-id={track.id} 
+                                data-price={track.price}
+                            >
+                                ${track.price} License
+                            </button>
+                            <button 
+                                onClick={() => setInquiryBeat(track)}
+                                className="p-2 border border-neutral-800 rounded text-neutral-400 hover:text-indigo-400 hover:border-indigo-500/30 transition-colors"
+                                title="Custom Request"
+                            >
+                                <Target size={18} />
+                            </button>
+                            {localStorage.getItem('KRYPSIDE_ADMIN_AUTH') === 'true' && (
+                                <button 
+                                    onClick={() => {
+                                        window.location.href = `/admin-portal?edit=${track.id}`;
+                                    }}
+                                    className="p-2 border border-neutral-800 rounded text-neutral-400 hover:text-indigo-400"
+                                    title="Edit in Admin Portal"
+                                >
+                                    ⚙️
+                                </button>
+                            )}
+                        </div>
                     </div>
-                </div>
-            ))}
+                );
+            })}
 
             {inquiryBeat && (
                 <CustomRequestModal 

@@ -260,6 +260,9 @@ export async function loadStorefrontBeats(): Promise<any[]> {
           audioUrl: audioStreamUrl,
           coverArtUrl: artworkStreamUrl,
           artworkUrl: artworkStreamUrl,
+          artwork: artworkStreamUrl,
+          coverUrl: artworkStreamUrl,
+          imageUrl: artworkStreamUrl,
           isLocal: true,
           producer: track.producer || 'Pyrex Spinna'
         };
@@ -388,6 +391,9 @@ export async function getUnifiedHardcodedBeats(): Promise<any[]> {
         audioUrl: URL.createObjectURL(fullBlob),
         coverArtUrl: generatedArtworkUrl,
         artworkUrl: generatedArtworkUrl,
+        artwork: generatedArtworkUrl,
+        coverUrl: generatedArtworkUrl,
+        imageUrl: generatedArtworkUrl,
         isLocal: true,
         producer: track.producer || 'Pyrex Spinna'
       });

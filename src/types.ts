@@ -117,6 +117,9 @@ export interface Beat {
   priceWav?: number;
   coverArtUrl: string;
   artworkUrl?: string;
+  artwork?: string; // New: direct artwork property
+  coverUrl?: string; // New: direct cover property
+  imageUrl?: string; // New: direct image property
   previewUrl?: string;
   directAudioUrl?: string; // External direct streaming URL (Internet Archive / S3)
   backupArtworkUrl?: string; // Fallback cloud graphic link
