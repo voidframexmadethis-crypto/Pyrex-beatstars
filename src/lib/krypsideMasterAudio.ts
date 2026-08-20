@@ -99,7 +99,7 @@ class KrypsideMasterAudioEngine {
 
       // 2. Preamp Gain Node (Volume & Ramping)
       this.gainNode = this.audioCtx.createGain();
-      this.gainNode.gain.setValueAtTime(this.audioElement.volume || 0.85, this.audioCtx.currentTime);
+      this.gainNode.gain.setValueAtTime(this.audioElement.volume || 0.5, this.audioCtx.currentTime);
 
       // 3. 3-Band Parametric Equalizer
       this.lowEqNode = this.audioCtx.createBiquadFilter();

@@ -4,7 +4,7 @@
  * and true-peak protection for 100% distortion-free studio audio playback.
  */
 
-export function createMasterAudioChain(audioCtx: AudioContext, inputNode: AudioNode, initialVolume = 0.85) {
+export function createMasterAudioChain(audioCtx: AudioContext, inputNode: AudioNode, initialVolume = 0.5) {
   // 0. Dedicated Web Audio GainNode for clean volume control
   const gainNode = audioCtx.createGain();
   gainNode.gain.setValueAtTime(initialVolume, audioCtx.currentTime);

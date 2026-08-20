@@ -430,7 +430,7 @@ export default function Storefront() {
                     >
                       <div className={`${(isCelebrationMode || beat.freeDownload?.enabled) ? '!bg-emerald-600/20 !border-emerald-500/30 !text-emerald-400' : ''} beat-price-tag gap-1.5`}>
                         {(isCelebrationMode || beat.freeDownload?.enabled) ? <Download size={12} /> : <ShoppingCart size={12} />}
-                        <span>{(isCelebrationMode || beat.freeDownload?.enabled) ? 'FREE DOWNLOAD (.M4A)' : `${Number(beat.price).toFixed(2)}`}</span>
+                        <span>{(isCelebrationMode || beat.freeDownload?.enabled) ? 'FREE DOWNLOAD (.M4A)' : `$${Number(beat.price).toFixed(2)}`}</span>
                       </div>
                     </button>
                     <button 
@@ -557,7 +557,7 @@ export default function Storefront() {
                     >
                       <div className={`${(isCelebrationMode || beat.freeDownload?.enabled) ? '!bg-emerald-600/20 !border-emerald-500/30 !text-emerald-400' : ''} beat-price-tag gap-1`}>
                         {(isCelebrationMode || beat.freeDownload?.enabled) ? <Download size={14} /> : <ShoppingCart size={14} />}
-                        <span>{(isCelebrationMode || beat.freeDownload?.enabled) ? 'FREE DOWNLOAD (TAGGED .M4A)' : `${Number(beat.price).toFixed(2)}`}</span>
+                        <span>{(isCelebrationMode || beat.freeDownload?.enabled) ? 'FREE DOWNLOAD (TAGGED .M4A)' : `$${Number(beat.price).toFixed(2)}`}</span>
                       </div>
                     </button>
                     <div className="flex items-center gap-3">

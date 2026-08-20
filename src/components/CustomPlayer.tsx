@@ -1,12 +1,13 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Beat } from '../types';
 
 interface CustomPlayerProps {
   beat: Beat & { 
-    genre?: string; 
-    scale?: string; 
-    customPrice: number; 
-    onCheckout: (beat: Beat) => void 
+    genre?: string;
+    scale?: string;
+    customPrice?: number;
+    price?: number | string;
+    onCheckout?: (beat: Beat) => void 
   };
 }
 
@@ -15,13 +16,79 @@ export default function CustomPlayer({ beat }: CustomPlayerProps) {
   const [progress, setProgress] = useState(0);
   const audioRef = useRef<HTMLAudioElement>(null);
 
+  // Set default audio volume lower to prevent it from being "very high"
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = 0.4;
+    }
+  }, []);
+
+  // Classic DJ Drop Synthesizer: Train Whistle + Air Horn
+  const playDJDrop = () => {
+    try {
+      const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioContext) return;
+      const ctx = new AudioContext();
+      const dest = ctx.destination;
+
+      // 1. Train Whistle Sound (Two dissonant square/sine waves)
+      const tOsc1 = ctx.createOscillator();
+      const tOsc2 = ctx.createOscillator();
+      const tGain = ctx.createGain();
+      
+      tOsc1.type = 'square';
+      tOsc2.type = 'square';
+      tOsc1.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+      tOsc2.frequency.setValueAtTime(739.99, ctx.currentTime); // F#5
+      
+      tGain.gain.setValueAtTime(0.0, ctx.currentTime);
+      tGain.gain.linearRampToValueAtTime(0.15, ctx.currentTime + 0.1);
+      tGain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.6);
+      
+      tOsc1.connect(tGain);
+      tOsc2.connect(tGain);
+      tGain.connect(dest);
+      
+      tOsc1.start(ctx.currentTime);
+      tOsc2.start(ctx.currentTime);
+      tOsc1.stop(ctx.currentTime + 0.6);
+      tOsc2.stop(ctx.currentTime + 0.6);
+
+      // 2. Quick Air Horn (Sawtooth pitch drop) shortly after
+      setTimeout(() => {
+        if (ctx.state === 'closed') return;
+        const hOsc = ctx.createOscillator();
+        const hGain = ctx.createGain();
+        
+        hOsc.type = 'sawtooth';
+        hOsc.frequency.setValueAtTime(450, ctx.currentTime);
+        hOsc.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.4);
+        
+        hGain.gain.setValueAtTime(0.3, ctx.currentTime);
+        hGain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+        
+        hOsc.connect(hGain);
+        hGain.connect(dest);
+        
+        hOsc.start(ctx.currentTime);
+        hOsc.stop(ctx.currentTime + 0.4);
+      }, 300);
+
+    } catch (e) {
+      console.warn("DJ Drop synth failed", e);
+    }
+  };
+
   // Toggle Play / Pause with high fidelity stream handling
   const togglePlay = () => {
     if (!audioRef.current) return;
+    
     if (isPlaying) {
       audioRef.current.pause();
     } else {
       audioRef.current.play().catch(e => console.error("Playback failed:", e));
+      // Trigger the requested train sound / air horn DJ tag on play
+      playDJDrop();
     }
     setIsPlaying(!isPlaying);
   };
@@ -50,7 +117,7 @@ export default function CustomPlayer({ beat }: CustomPlayerProps) {
           </div>
         </div>
         <div className="text-right">
-          <span className="text-red-500 font-extrabold text-xl">${beat.customPrice.toFixed(2)}</span>
+          <p className="text-red-500 font-extrabold text-xl">${beat.price !== undefined && beat.price !== null && beat.price !== '' ? (typeof beat.price === 'number' ? beat.price.toFixed(2) : beat.price) : (beat.customPrice !== undefined ? beat.customPrice.toFixed(2) : '49.99')}</p>
         </div>
       </div>
 
@@ -79,9 +146,12 @@ export default function CustomPlayer({ beat }: CustomPlayerProps) {
         >
           {isPlaying ? '⏸ PAUSE' : '▶ PLAY BEAT'}
         </button>
-
         <button 
-          onClick={() => beat.onCheckout(beat)}
+          onClick={() => {
+            if (beat.onCheckout) {
+              beat.onCheckout(beat);
+            }
+          }}
           className="bg-zinc-900 hover:bg-zinc-800 text-white border border-zinc-700 px-4 py-2 rounded-lg text-sm font-semibold transition-all"
         >
           Instant Crypto Buy
