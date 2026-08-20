@@ -2,189 +2,175 @@ import React, { useState } from 'react';
 import { Beat } from '../types';
 
 interface SecureCheckoutModalProps {
-  beat?: Beat | null;
+  beat?: Beat | any;
   onClose: () => void;
-  onSuccess?: (details: any) => void;
 }
 
-export default function SecureCheckoutModal({ beat, onClose, onSuccess }: SecureCheckoutModalProps) {
-  // Use state for custom pricing, defaulting to whatever dynamic beat price is passed, or an editable custom input
-  const initialPrice = beat?.price !== undefined && beat?.price !== null && beat?.price !== '' 
-    ? String(beat.price) 
-    : '49.99';
+export default function SecureCheckoutModal({ beat, onClose }: SecureCheckoutModalProps) {
+  // 1. Clean up the title (remove redundant file extensions or long BPM strings if needed)
+  const cleanTitle = beat?.title 
+    ? beat.title.replace(/(-?\s*MAIN\s*OUT)+/gi, '').trim() 
+    : "Custom Beat Track";
 
-  const [customPrice, setCustomPrice] = useState<string | number>(initialPrice);
-  const [licenseType, setLicenseType] = useState<string>('WAV Lease');
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  // 2. Dynamic pricing state - NO hardcoded 49.99
+  const [price, setPrice] = useState<number | string>(beat?.price || 29.99);
+  const [licenseType, setLicenseType] = useState('WAV Lease');
+  const [agreed, setAgreed] = useState(false);
+  const [showAgreementModal, setShowAgreementModal] = useState(false);
 
-  const numericPrice = Number(customPrice) || 0;
-
-  const getTierPrice = (tier: string): number => {
-    if (tier === 'Trackout Lease') return numericPrice * 1.5;
-    if (tier === 'Exclusive Rights') return numericPrice * 5;
-    return numericPrice;
-  };
-
-  const currentPrice = getTierPrice(licenseType);
-
-  const handleCheckoutAction = async (method: '1tap' | 'paypal' | 'crypto') => {
-    setIsProcessing(true);
-    setStatusMessage(null);
-
-    try {
-      if (method === '1tap') {
-        setStatusMessage('⚡ Initializing 1-Tap Express Checkout...');
-        const response = await fetch('/api/checkout', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            beatId: beat?.id || `custom-${Date.now()}`,
-            beatTitle: beat?.title || 'Custom Beat Track',
-            licenseType,
-            amount: currentPrice,
-            paymentMethod: '1-TAP'
-          })
-        }).catch(() => null);
-
-        if (response?.ok) {
-          const data = await response.json();
-          if (data.url) {
-            window.location.href = data.url;
-            return;
-          }
-        }
-
-        setTimeout(() => {
-          setIsProcessing(false);
-          setStatusMessage(`✅ Express license verified for ${beat?.title || 'Custom Track'} ($${currentPrice.toFixed(2)})!`);
-          if (onSuccess) {
-            onSuccess({ beat, licenseType, price: currentPrice, method: '1-TAP' });
-          }
-        }, 800);
-      } else if (method === 'paypal') {
-        setStatusMessage('💳 Connecting to PayPal gateway...');
-        setTimeout(() => {
-          setIsProcessing(false);
-          setStatusMessage(`💳 Ready for PayPal checkout: $${currentPrice.toFixed(2)} USD`);
-          if (onSuccess) {
-            onSuccess({ beat, licenseType, price: currentPrice, method: 'PayPal' });
-          }
-        }, 800);
-      } else if (method === 'crypto') {
-        setStatusMessage('💎 Connecting to Crypto gateway (USDC / ETH / SOL)...');
-        setTimeout(() => {
-          setIsProcessing(false);
-          setStatusMessage(`💎 Instant crypto invoice generated: $${currentPrice.toFixed(2)} USD equivalent`);
-          if (onSuccess) {
-            onSuccess({ beat, licenseType, price: currentPrice, method: 'Crypto' });
-          }
-        }, 800);
-      }
-    } catch (err) {
-      setIsProcessing(false);
-      setStatusMessage('Payment routing encountered an error. Please try again.');
+  const handleCheckout = (gateway: string) => {
+    if (!agreed) {
+      alert("Please agree to the license terms before proceeding.");
+      return;
     }
+    // Handle your gateway logic here (1-Tap, PayPal, Crypto)
+    alert(`Initiating ${gateway} checkout for ${cleanTitle} at $${price}`);
   };
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-      <div className="bg-[#120a1f] border border-purple-500/30 rounded-2xl max-w-lg w-full p-6 text-white relative shadow-2xl">
+    <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+      <div className="bg-[#120a1f] border border-purple-500/40 rounded-2xl max-w-lg w-full p-6 text-white relative shadow-2xl">
         
         {/* Close Button */}
         <button 
-          id="close-secure-checkout-btn"
+          id="close-secure-modal-btn"
+          type="button"
           onClick={onClose}
-          className="absolute top-4 right-4 bg-purple-600/30 hover:bg-purple-600/60 p-2 rounded-xl text-white transition-all focus:outline-none"
+          className="absolute top-4 right-4 bg-purple-600/30 hover:bg-purple-600/60 p-2.5 rounded-xl text-white transition-all"
         >
           ✕
         </button>
 
-        <h2 className="text-xl font-bold tracking-wider mb-6 text-purple-200">
+        <h2 className="text-xl font-bold tracking-wider mb-5 text-purple-200">
           SECURE CHECKOUT TERMINAL
         </h2>
 
-        {/* Dynamic Track Info */}
-        <div className="bg-purple-950/40 border border-purple-500/20 rounded-xl p-4 mb-6 flex justify-between items-center">
+        {/* Dynamic Track Summary Card (Shows Clean Title, Not Raw Filename) */}
+        <div className="bg-purple-950/40 border border-purple-500/20 rounded-xl p-4 mb-5 flex justify-between items-center">
           <div>
-            <p className="text-xs text-purple-400 uppercase tracking-widest">{licenseType}</p>
-            <p className="font-semibold text-lg">{beat?.title || "Custom Beat Track"}</p>
+            <p className="text-xs text-purple-400 uppercase tracking-widest font-semibold">{licenseType}</p>
+            <p className="font-bold text-base text-white mt-1 max-w-[260px] truncate">{cleanTitle}</p>
           </div>
           <div className="text-right">
-            {/* DYNAMIC PRICE DISPLAY - NO HARDCODED VALUES */}
             <span className="text-2xl font-black text-purple-300">
-              ${customPrice ? currentPrice.toFixed(2) : '0.00'}
+              ${Number(price).toFixed(2)}
             </span>
           </div>
         </div>
 
-        {/* Custom Producer Price Input Field */}
-        <div className="mb-6">
-          <label className="block text-xs uppercase tracking-wider text-purple-400 mb-2">
-            Set Your Custom Price (USD)
+        {/* Custom Price Input (Producer Control) */}
+        <div className="mb-4">
+          <label className="block text-xs uppercase tracking-wider text-purple-400 mb-1.5 font-semibold">
+            Custom Price (USD)
           </label>
           <input 
-            id="custom-price-input"
+            id="secure-custom-price-input"
             type="number" 
-            value={customPrice}
-            onChange={(e) => setCustomPrice(e.target.value)}
-            placeholder="Enter custom price..."
-            className="w-full bg-black/50 border border-purple-500/40 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-purple-400 transition-all text-lg font-bold"
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            className="w-full bg-black/60 border border-purple-500/40 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-purple-400 text-lg font-bold"
           />
         </div>
 
         {/* License Tier Selector */}
-        <div className="mb-6">
-          <label className="block text-xs uppercase tracking-wider text-purple-400 mb-2">
+        <div className="mb-4">
+          <label className="block text-xs uppercase tracking-wider text-purple-400 mb-1.5 font-semibold">
             Select License Tier
           </label>
           <select 
-            id="license-tier-selector"
+            id="secure-license-type-select"
             value={licenseType}
-            onChange={(e) => setLicenseType(e.target.value)}
-            className="w-full bg-black/50 border border-purple-500/40 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-purple-400 transition-all cursor-pointer"
+            onChange={(e) => {
+              const type = e.target.value;
+              setLicenseType(type);
+              if (type === 'Trackout Lease') setPrice((Number(beat?.price) || 29.99) * 1.5);
+              if (type === 'Exclusive Rights') setPrice((Number(beat?.price) || 29.99) * 4);
+              if (type === 'WAV Lease') setPrice(Number(beat?.price) || 29.99);
+            }}
+            className="w-full bg-black/60 border border-purple-500/40 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-purple-400 cursor-pointer"
           >
-            <option value="WAV Lease">WAV Lease — ${numericPrice.toFixed(2)} USD</option>
-            <option value="Trackout Lease">Trackout Lease — ${(numericPrice * 1.5).toFixed(2)} USD</option>
-            <option value="Exclusive Rights">Exclusive Rights — ${(numericPrice * 5).toFixed(2)} USD</option>
+            <option value="WAV Lease">WAV Lease — ${Number(price).toFixed(2)} USD</option>
+            <option value="Trackout Lease">Trackout Lease — ${(Number(price) * 1.5).toFixed(2)} USD</option>
+            <option value="Exclusive Rights">Exclusive Rights — ${(Number(price) * 4).toFixed(2)} USD</option>
           </select>
         </div>
 
-        {statusMessage && (
-          <div className="mb-4 p-3 bg-purple-900/40 border border-purple-500/40 rounded-xl text-xs text-purple-200 text-center animate-in fade-in duration-150">
-            {statusMessage}
-          </div>
-        )}
+        {/* Controlled License Agreement Checkbox (Stays inside modal instead of blank white screen) */}
+        <div className="mb-6 flex items-center justify-between bg-black/40 p-3 rounded-xl border border-purple-500/20">
+          <label className="flex items-center space-x-3 cursor-pointer text-xs text-purple-300">
+            <input 
+              id="license-agree-checkbox"
+              type="checkbox" 
+              checked={agreed}
+              onChange={(e) => setAgreed(e.target.checked)}
+              className="w-4 h-4 rounded accent-purple-600 bg-black cursor-pointer"
+            />
+            <span>
+              I agree to the{' '}
+              <button 
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setShowAgreementModal(true);
+                }} 
+                className="underline text-purple-400 hover:text-white"
+              >
+                License Terms & Conditions
+              </button>
+            </span>
+          </label>
+        </div>
 
-        {/* Action Buttons */}
+        {/* Action Buttons: 1-Tap, PayPal, Crypto */}
         <div className="grid grid-cols-3 gap-3">
           <button 
-            id="checkout-1tap-btn"
-            disabled={isProcessing}
-            onClick={() => handleCheckoutAction('1tap')}
-            className="bg-gradient-to-r from-yellow-500 to-amber-600 text-black font-bold py-3 rounded-xl hover:opacity-90 active:scale-95 transition-all shadow-lg disabled:opacity-50"
+            id="secure-1tap-btn"
+            type="button"
+            onClick={() => handleCheckout('1-Tap')}
+            className="bg-gradient-to-r from-yellow-500 to-amber-600 text-black font-extrabold py-3 rounded-xl hover:opacity-90 transition-all shadow-lg text-sm active:scale-95"
           >
             ⚡ 1-TAP
           </button>
           <button 
-            id="checkout-paypal-btn"
-            disabled={isProcessing}
-            onClick={() => handleCheckoutAction('paypal')}
-            className="bg-purple-600/50 hover:bg-purple-600/80 border border-purple-400/30 text-white font-bold py-3 rounded-xl active:scale-95 transition-all disabled:opacity-50"
+            id="secure-paypal-btn"
+            type="button"
+            onClick={() => handleCheckout('PayPal')}
+            className="bg-purple-600/50 hover:bg-purple-600/80 border border-purple-400/30 text-white font-bold py-3 rounded-xl transition-all text-sm active:scale-95"
           >
             💳 PAYPAL
           </button>
           <button 
-            id="checkout-crypto-btn"
-            disabled={isProcessing}
-            onClick={() => handleCheckoutAction('crypto')}
-            className="bg-purple-600/50 hover:bg-purple-600/80 border border-purple-400/30 text-white font-bold py-3 rounded-xl active:scale-95 transition-all disabled:opacity-50"
+            id="secure-crypto-btn"
+            type="button"
+            onClick={() => handleCheckout('Crypto')}
+            className="bg-purple-600/50 hover:bg-purple-600/80 border border-purple-400/30 text-white font-bold py-3 rounded-xl transition-all text-sm active:scale-95"
           >
             💎 CRYPTO
           </button>
         </div>
 
       </div>
+
+      {/* Embedded Terms Modal (Prevents white-screen popups) */}
+      {showAgreementModal && (
+        <div className="absolute inset-0 bg-black/90 z-60 flex items-center justify-center p-6 animate-in fade-in duration-150">
+          <div className="bg-[#181028] border border-purple-500 rounded-2xl max-w-md w-full p-6 text-white relative shadow-2xl">
+            <h3 className="text-lg font-bold mb-3 text-purple-200">License Terms Summary</h3>
+            <p className="text-xs text-purple-300 leading-relaxed mb-4 max-h-48 overflow-y-auto pr-2">
+              This agreement is effective upon purchase of the licensed material. The producer grants the licensee non-exclusive rights to use the beat under the selected tier parameters. Governing law applies to the producer's jurisdiction.
+            </p>
+            <button 
+              id="close-terms-modal-btn"
+              type="button"
+              onClick={() => setShowAgreementModal(false)}
+              className="w-full bg-purple-600 hover:bg-purple-700 py-2.5 rounded-xl font-bold text-sm transition-all"
+            >
+              Got It
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
