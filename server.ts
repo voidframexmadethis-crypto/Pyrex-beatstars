@@ -59,7 +59,7 @@ async function connectToMongoDB() {
   }
   try {
     mongoose.set('bufferCommands', false);
-    await mongoose.connect(uri || 'mongodb://localhost/mock').catch(err => console.warn('MongoDB not connected — some features may not work'));
+    await mongoose.connect(uri, { serverSelectionTimeoutMS: 2000 }).catch(err => console.warn('MongoDB not connected — some features may not work'));
     console.log('Pyrex Spinna Database Connected Successfully.');
     isMongooseConnected = true;
   } catch (err) {
@@ -112,68 +112,75 @@ async function startServer() {
     fs.mkdirSync(VAULT_DIR, { recursive: true });
   }
 
-  // Ensure tables exist
-  if (prisma) {
-    try {
-      await prisma.$executeRaw`CREATE TABLE IF NOT EXISTS "PyrexSpinnaInfiniteTrack" (
-        "id" TEXT NOT NULL,
-        "title" VARCHAR(255) NOT NULL,
-        "slug" TEXT NOT NULL UNIQUE,
-        "bpm" INTEGER NOT NULL,
-        "keySignature" VARCHAR(50) NOT NULL,
-        "genre" TEXT NOT NULL DEFAULT 'Trap',
-        "subGenre" TEXT,
-        "moodTags" TEXT[],
-        "awsAudioUrl" TEXT NOT NULL,
-        "awsArtworkUrl" TEXT NOT NULL,
-        "priceMp3" DOUBLE PRECISION NOT NULL DEFAULT 29.99,
-        "priceWav" DOUBLE PRECISION NOT NULL DEFAULT 49.99,
-        "priceStems" DOUBLE PRECISION NOT NULL DEFAULT 99.99,
-        "priceExclusive" DOUBLE PRECISION NOT NULL DEFAULT 999.99,
-        "isExclusiveSold" BOOLEAN NOT NULL DEFAULT false,
-        "isVaultLocked" BOOLEAN NOT NULL DEFAULT false,
-        "streamCount" INTEGER NOT NULL DEFAULT 0,
-        "downloadCount" INTEGER NOT NULL DEFAULT 0,
-        "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        CONSTRAINT "PyrexSpinnaInfiniteTrack_pkey" PRIMARY KEY ("id")
-      );`;
-      
+  // Ensure tables exist (non-blocking background task)
+  if (prisma && typeof prisma.$executeRaw === 'function') {
+    (async () => {
       try {
-        await prisma.$executeRaw`ALTER TABLE "PyrexSpinnaInfiniteTrack" ADD COLUMN "archive_audio_url" VARCHAR(1024);`;
-      } catch (e) { /* Column might already exist */ }
-      try {
-        await prisma.$executeRaw`ALTER TABLE "PyrexSpinnaInfiniteTrack" ADD COLUMN "archive_artwork_url" VARCHAR(1024);`;
-      } catch (e) { /* Column might already exist */ }
+        await Promise.race([
+          (async () => {
+            await prisma.$executeRaw`CREATE TABLE IF NOT EXISTS "PyrexSpinnaInfiniteTrack" (
+              "id" TEXT NOT NULL,
+              "title" VARCHAR(255) NOT NULL,
+              "slug" TEXT NOT NULL UNIQUE,
+              "bpm" INTEGER NOT NULL,
+              "keySignature" VARCHAR(50) NOT NULL,
+              "genre" TEXT NOT NULL DEFAULT 'Trap',
+              "subGenre" TEXT,
+              "moodTags" TEXT[],
+              "awsAudioUrl" TEXT NOT NULL,
+              "awsArtworkUrl" TEXT NOT NULL,
+              "priceMp3" DOUBLE PRECISION NOT NULL DEFAULT 29.99,
+              "priceWav" DOUBLE PRECISION NOT NULL DEFAULT 49.99,
+              "priceStems" DOUBLE PRECISION NOT NULL DEFAULT 99.99,
+              "priceExclusive" DOUBLE PRECISION NOT NULL DEFAULT 999.99,
+              "isExclusiveSold" BOOLEAN NOT NULL DEFAULT false,
+              "isVaultLocked" BOOLEAN NOT NULL DEFAULT false,
+              "streamCount" INTEGER NOT NULL DEFAULT 0,
+              "downloadCount" INTEGER NOT NULL DEFAULT 0,
+              "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+              "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+              CONSTRAINT "PyrexSpinnaInfiniteTrack_pkey" PRIMARY KEY ("id")
+            );`;
+            
+            try {
+              await prisma.$executeRaw`ALTER TABLE "PyrexSpinnaInfiniteTrack" ADD COLUMN "archive_audio_url" VARCHAR(1024);`;
+            } catch (e) { /* Column might already exist */ }
+            try {
+              await prisma.$executeRaw`ALTER TABLE "PyrexSpinnaInfiniteTrack" ADD COLUMN "archive_artwork_url" VARCHAR(1024);`;
+            } catch (e) { /* Column might already exist */ }
 
-      await prisma.$executeRaw`CREATE TABLE IF NOT EXISTS "Transaction" (
-        "id" TEXT NOT NULL,
-        "trackId" TEXT NOT NULL,
-        "buyerEmail" TEXT NOT NULL,
-        "licenseType" TEXT NOT NULL,
-        "amountPaid" DOUBLE PRECISION NOT NULL,
-        "paymentGateway" TEXT NOT NULL,
-        "licensePdfUrl" TEXT NOT NULL,
-        "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        CONSTRAINT "Transaction_pkey" PRIMARY KEY ("id")
-      );`;
-      
-      await prisma.$executeRaw`CREATE TABLE IF NOT EXISTS "RecordPlaque" (
-        "plaqueId" TEXT NOT NULL,
-        "artistName" TEXT NOT NULL,
-        "releaseTitle" TEXT NOT NULL,
-        "milestoneType" TEXT NOT NULL,
-        "frameStyle" TEXT NOT NULL,
-        "verificationSourceUrl" TEXT NOT NULL,
-        "customerShippingAddress" JSONB NOT NULL,
-        "orderStatus" TEXT NOT NULL,
-        "price" DOUBLE PRECISION NOT NULL,
-        "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        CONSTRAINT "RecordPlaque_pkey" PRIMARY KEY ("plaqueId")
-      );`;
-    } catch (err) {
-      console.log("Database table auto-init notice:", err);
-    }
+            await prisma.$executeRaw`CREATE TABLE IF NOT EXISTS "Transaction" (
+              "id" TEXT NOT NULL,
+              "trackId" TEXT NOT NULL,
+              "buyerEmail" TEXT NOT NULL,
+              "licenseType" TEXT NOT NULL,
+              "amountPaid" DOUBLE PRECISION NOT NULL,
+              "paymentGateway" TEXT NOT NULL,
+              "licensePdfUrl" TEXT NOT NULL,
+              "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+              CONSTRAINT "Transaction_pkey" PRIMARY KEY ("id")
+            );`;
+            
+            await prisma.$executeRaw`CREATE TABLE IF NOT EXISTS "RecordPlaque" (
+              "plaqueId" TEXT NOT NULL,
+              "artistName" TEXT NOT NULL,
+              "releaseTitle" TEXT NOT NULL,
+              "milestoneType" TEXT NOT NULL,
+              "frameStyle" TEXT NOT NULL,
+              "verificationSourceUrl" TEXT NOT NULL,
+              "customerShippingAddress" JSONB NOT NULL,
+              "orderStatus" TEXT NOT NULL,
+              "price" DOUBLE PRECISION NOT NULL,
+              "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+              CONSTRAINT "RecordPlaque_pkey" PRIMARY KEY ("plaqueId")
+            );`;
+          })(),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('DB init timeout')), 2000))
+        ]);
+      } catch (err) {
+        console.log("Database table auto-init notice (running in fallback mode):", (err as any)?.message || err);
+      }
+    })().catch(() => {});
   }
 
   const firebaseApp = initializeApp(firebaseConfig);
@@ -184,6 +191,10 @@ async function startServer() {
 
   app.use(cors());
   app.use(express.json());
+  
+  app.get('/api/health', (req, res) => {
+    res.json({ status: 'ok', uptime: process.uptime() });
+  });
   
   // Serve uploaded files
   app.use('/uploads', express.static(VAULT_DIR));

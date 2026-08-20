@@ -48,6 +48,7 @@ const ARPitchPortal = safeLazy(() => import('./pages/ARPitchPortal'), 'ARPitchPo
 const SonicSearchPage = safeLazy(() => import('./pages/SonicSearchPage'), 'SonicSearchPage');
 const OfflineSimulator = safeLazy(() => import('./components/OfflineSimulator'), 'OfflineSimulator');
 const VaultPage = safeLazy(() => import('./pages/VaultPage'), 'VaultPage');
+const BeatStore = safeLazy(() => import('./pages/BeatStore'), 'BeatStore');
 
 // Elegant, domain-appropriate page loading indicator
 const PageLoader = () => (
@@ -400,6 +401,30 @@ export default function App() {
                                 <PyrexSpinnaStore />
                               </ErrorBoundary>
                             </div>
+                          } 
+                        />
+                        <Route 
+                          path="beatstore" 
+                          element={
+                            <ErrorBoundary name="Beat Store">
+                              <BeatStore />
+                            </ErrorBoundary>
+                          } 
+                        />
+                        <Route 
+                          path="beat-store" 
+                          element={
+                            <ErrorBoundary name="Beat Store">
+                              <BeatStore />
+                            </ErrorBoundary>
+                          } 
+                        />
+                        <Route 
+                          path="shop" 
+                          element={
+                            <ErrorBoundary name="Beat Store">
+                              <BeatStore />
+                            </ErrorBoundary>
                           } 
                         />
                         <Route 

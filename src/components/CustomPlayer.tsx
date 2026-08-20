@@ -13,6 +13,10 @@ interface CustomPlayerProps {
 }
 
 export default function CustomPlayer({ beat }: CustomPlayerProps) {
+  // Force your custom fallback values right here so it ignores any broken props
+  const displayTitle = "Costly 128BPM B minor"; // Your clean beat name
+  const displayPrice = "29.99"; // Your exact custom price
+
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [showCheckout, setShowCheckout] = useState(false);
@@ -111,15 +115,15 @@ export default function CustomPlayer({ beat }: CustomPlayerProps) {
       {/* Top Row: Info & Multi-Tags */}
       <div className="flex justify-between items-start z-10">
         <div>
-          <h3 className="text-white font-bold text-lg tracking-wide">{beat.title}</h3>
+          <h3 className="text-white font-bold text-lg tracking-wide">{beat.title ? beat.title.replace(/(-?\s*MAIN\s*OUT)+/gi, '').trim() : displayTitle}</h3>
           <div className="flex gap-2 mt-1">
             <span className="text-xs bg-zinc-900 text-zinc-400 px-2 py-0.5 rounded-md border border-zinc-800">{beat.genre || 'Trap'}</span>
-            <span className="text-xs bg-zinc-900 text-zinc-400 px-2 py-0.5 rounded-md border border-zinc-800">{beat.bpm} BPM</span>
-            <span className="text-xs bg-zinc-900 text-zinc-400 px-2 py-0.5 rounded-md border border-zinc-800">{beat.key || 'N/A'}</span>
+            <span className="text-xs bg-zinc-900 text-zinc-400 px-2 py-0.5 rounded-md border border-zinc-800">{beat.bpm ? `${beat.bpm} BPM` : '128 BPM'}</span>
+            <span className="text-xs bg-zinc-900 text-zinc-400 px-2 py-0.5 rounded-md border border-zinc-800">{beat.key || 'B minor'}</span>
           </div>
         </div>
         <div className="text-right">
-          <p className="text-red-500 font-extrabold text-xl">${beat.price !== undefined && beat.price !== null && beat.price !== '' ? (typeof beat.price === 'number' ? beat.price.toFixed(2) : beat.price) : (beat.customPrice !== undefined ? beat.customPrice.toFixed(2) : '49.99')}</p>
+          <p className="text-red-500 font-extrabold text-xl">${beat.price !== undefined && beat.price !== null && beat.price !== '' ? (typeof beat.price === 'number' ? beat.price.toFixed(2) : beat.price) : (beat.customPrice !== undefined ? beat.customPrice.toFixed(2) : displayPrice)}</p>
         </div>
       </div>
 

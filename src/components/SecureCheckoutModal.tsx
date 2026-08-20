@@ -7,13 +7,17 @@ interface SecureCheckoutModalProps {
 }
 
 export default function SecureCheckoutModal({ beat, onClose }: SecureCheckoutModalProps) {
+  // Force your custom fallback values right here so it ignores any broken props
+  const displayTitle = "Costly 128BPM B minor"; // Your clean beat name
+  const displayPrice = "29.99"; // Your exact custom price
+
   // 1. Clean up the title (remove redundant file extensions or long BPM strings if needed)
   const cleanTitle = beat?.title 
     ? beat.title.replace(/(-?\s*MAIN\s*OUT)+/gi, '').trim() 
-    : "Custom Beat Track";
+    : displayTitle;
 
   // 2. Dynamic pricing state - NO hardcoded 49.99
-  const [price, setPrice] = useState<number | string>(beat?.price || 29.99);
+  const [price, setPrice] = useState<number | string>(beat?.price || displayPrice);
   const [licenseType, setLicenseType] = useState('WAV Lease');
   const [agreed, setAgreed] = useState(false);
   const [showAgreementModal, setShowAgreementModal] = useState(false);
@@ -83,9 +87,10 @@ export default function SecureCheckoutModal({ beat, onClose }: SecureCheckoutMod
             onChange={(e) => {
               const type = e.target.value;
               setLicenseType(type);
-              if (type === 'Trackout Lease') setPrice((Number(beat?.price) || 29.99) * 1.5);
-              if (type === 'Exclusive Rights') setPrice((Number(beat?.price) || 29.99) * 4);
-              if (type === 'WAV Lease') setPrice(Number(beat?.price) || 29.99);
+              const basePrice = Number(beat?.price || displayPrice) || 29.99;
+              if (type === 'Trackout Lease') setPrice(basePrice * 1.5);
+              if (type === 'Exclusive Rights') setPrice(basePrice * 4);
+              if (type === 'WAV Lease') setPrice(basePrice);
             }}
             className="w-full bg-black/60 border border-purple-500/40 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-purple-400 cursor-pointer"
           >
