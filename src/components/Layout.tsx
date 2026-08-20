@@ -26,8 +26,6 @@ import {
   Scale,
   Wallet,
   Layers,
-  ChevronDown,
-  Settings,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useStore } from "../context/StoreContext";
@@ -42,7 +40,6 @@ import CommandPalette from "./CommandPalette";
 import FlashSaleBanner from "./FlashSaleBanner";
 import { AdminReset } from "./AdminReset";
 import { BundleBuilderModal } from "./BundleBuilderModal";
-import ProducerProfileModal from "./ProducerProfileModal";
 
 import SEO from "./SEO";
 
@@ -60,25 +57,7 @@ export default function Layout() {
   const [isPlayingVoice, setIsPlayingVoice] = useState(false);
   const [isUploaderOverlayOpen, setIsUploaderOverlayOpen] = useState(false);
   const [isBundleModalOpen, setIsBundleModalOpen] = useState(false);
-  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-  const [profileModalTab, setProfileModalTab] = useState<'profile' | 'edit'>('profile');
-  const [isProducerDropdownOpen, setIsProducerDropdownOpen] = useState(false);
-  const producerDropdownRef = React.useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent | TouchEvent) {
-      if (producerDropdownRef.current && !producerDropdownRef.current.contains(event.target as Node)) {
-        setIsProducerDropdownOpen(false);
-      }
-    }
-    if (isProducerDropdownOpen) {
-      document.addEventListener('pointerdown', handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener('pointerdown', handleClickOutside);
-    };
-  }, [isProducerDropdownOpen]);
 
   useEffect(() => {
     // Only track site visits for non-owners to ensure analytics accuracy
@@ -421,6 +400,7 @@ export default function Layout() {
 
   const navItems = [
     { to: "/", icon: Home, label: "Homepage" },
+    { to: "/", icon: Home, label: "Home" },
     { to: "/feed", icon: Sparkles, label: "Feed" },
     { to: "/beat-packs", icon: Layers, label: "Beat Packs" },
     { to: "/storefront", icon: Disc, label: "Collections" },
@@ -721,7 +701,7 @@ export default function Layout() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3 relative pl-2">
+          <div className="flex items-center gap-3 overflow-x-auto whitespace-nowrap relative [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] pl-2">
             {/* Web3 Wallet Connection Button */}
             {isConnected ? (
               <div 
@@ -765,23 +745,34 @@ export default function Layout() {
                 ) : (
                   <Wallet className="w-3.5 h-3.5" />
                 )}
-                <span className="hidden sm:inline">{isConnecting ? "Connecting..." : "Connect Wallet"}</span>
-                <span className="sm:hidden">{isConnecting ? "..." : "Wallet"}</span>
+                <span>{isConnecting ? "Connecting..." : "Connect Wallet"}</span>
               </button>
             )}
 
-            {/* Producer Account & Sign In Dropdown */}
-            <div className="relative" ref={producerDropdownRef}>
+            {/* Auth Button */}
+            {user ? (
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={logout}
+                  className="flex items-center gap-2 px-3 py-1.5 text-xs font-bold transition-all cursor-pointer hover:opacity-90"
+                  style={{
+                    background: 'linear-gradient(135deg, #9333ea, #c084fc)',
+                    color: '#ffffff',
+                    boxShadow: '0 4px 15px rgba(168, 85, 247, 0.4)',
+                    border: 'none',
+                    borderRadius: '10px'
+                  }}
+                  title="Logout"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Logout</span>
+                </button>
+              </div>
+            ) : (
               <button
-                id="producer-signin-dropdown-trigger"
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setIsProducerDropdownOpen((prev) => !prev);
-                }}
+                onClick={handleSignIn}
                 disabled={signingIn}
-                className="flex items-center gap-2 px-3.5 py-1.5 text-xs font-bold transition-all justify-center cursor-pointer hover:opacity-95 shadow-md active:scale-95 select-none"
+                className="flex items-center gap-2 px-4 py-1.5 text-xs font-bold transition-all min-w-[140px] justify-center cursor-pointer hover:opacity-90 disabled:opacity-50"
                 style={{
                   background: 'linear-gradient(135deg, #9333ea, #c084fc)',
                   color: '#ffffff',
@@ -789,138 +780,15 @@ export default function Layout() {
                   border: 'none',
                   borderRadius: '10px'
                 }}
-                title="Producer Profile & Authentication"
               >
                 {signingIn ? (
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                ) : user ? (
-                  <div className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center text-[10px]">
-                    👤
-                  </div>
                 ) : (
                   <LogIn className="w-3.5 h-3.5" />
                 )}
-                <span>
-                  {signingIn 
-                    ? "Signing in..." 
-                    : user 
-                      ? `PRODUCER SIGN IN (${user.displayName || user.email?.split('@')[0] || "Active"})`
-                      : "PRODUCER SIGN IN"
-                  }
-                </span>
-                <ChevronDown 
-                  className={`w-3.5 h-3.5 transition-transform duration-200 ${
-                    isProducerDropdownOpen ? "rotate-180" : ""
-                  }`} 
-                />
+                <span>{signingIn ? "Signing in..." : "Producer Sign In"}</span>
               </button>
-
-              {/* Toggleable Dropdown Menu Attached to Producer Sign In Button */}
-              {isProducerDropdownOpen && (
-                <>
-                  {/* Backdrop overlay for outside clicks */}
-                  <div 
-                    className="fixed inset-0 z-40 cursor-default" 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setIsProducerDropdownOpen(false);
-                    }} 
-                  />
-
-                  <div 
-                    id="producer-signin-dropdown-menu"
-                    className="absolute right-0 top-full mt-2 w-64 bg-[#120e24] border border-purple-500/40 rounded-2xl shadow-2xl p-2 z-[9999] text-white animate-in fade-in zoom-in-95 duration-150 backdrop-blur-xl"
-                    style={{
-                      boxShadow: '0 10px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(168, 85, 247, 0.25)'
-                    }}
-                  >
-                    {/* Dropdown Header Info */}
-                    <div className="px-3 py-2.5 bg-purple-950/40 rounded-xl mb-1.5 border border-purple-800/30">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-white font-black text-xs shadow">
-                          PY
-                        </div>
-                        <div className="overflow-hidden">
-                          <p className="text-xs font-bold text-white truncate">
-                            {localStorage.getItem('PYREX_DISPLAY_NAME') || state.profile.name || 'Pyrex Spinna'}
-                          </p>
-                          <p className="text-[10px] text-purple-300/70 truncate flex items-center gap-1">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                            <span>Verified Executive Producer</span>
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Dropdown Options */}
-                    <div className="space-y-1">
-                      <button
-                        id="dropdown-my-profile-home-page-btn"
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setIsProducerDropdownOpen(false);
-                          setProfileModalTab('profile');
-                          setIsProfileModalOpen(true);
-                        }}
-                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-purple-100 hover:bg-purple-600 hover:text-white transition-all text-left group cursor-pointer"
-                      >
-                        <UserIcon className="w-4 h-4 text-purple-400 group-hover:text-white transition-colors" />
-                        <span>My Profile Home Page</span>
-                      </button>
-
-                      <button
-                        id="dropdown-edit-profile-settings-btn"
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setIsProducerDropdownOpen(false);
-                          setProfileModalTab('edit');
-                          setIsProfileModalOpen(true);
-                        }}
-                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-purple-100 hover:bg-purple-600 hover:text-white transition-all text-left group cursor-pointer"
-                      >
-                        <Settings className="w-4 h-4 text-purple-400 group-hover:text-white transition-colors" />
-                        <span>Edit Profile Settings</span>
-                      </button>
-                    </div>
-
-                    <div className="h-px bg-purple-500/20 my-1.5 mx-1" />
-
-                    {/* Auth Action */}
-                    {user ? (
-                      <button
-                        id="dropdown-logout-btn"
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setIsProducerDropdownOpen(false);
-                          logout();
-                        }}
-                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-rose-300 hover:bg-rose-950/50 hover:text-rose-200 transition-all text-left cursor-pointer"
-                      >
-                        <LogOut className="w-4 h-4 text-rose-400" />
-                        <span>Producer Sign Out</span>
-                      </button>
-                    ) : (
-                      <button
-                        id="dropdown-signin-btn"
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setIsProducerDropdownOpen(false);
-                          handleSignIn();
-                        }}
-                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-purple-200 hover:bg-purple-900/60 hover:text-white transition-all text-left cursor-pointer"
-                      >
-                        <LogIn className="w-4 h-4 text-purple-400" />
-                        <span>Sign In as Producer</span>
-                      </button>
-                    )}
-                  </div>
-                </>
-              )}
-            </div>
+            )}
 
             {/* VIP Status Indicator */}
             {isSubscribed ? (
@@ -980,7 +848,7 @@ export default function Layout() {
                     className="fixed inset-0 z-40 cursor-default"
                     onClick={() => setNotifDropdownOpen(false)}
                   />
-                  <div className="absolute right-0 mt-3 w-80 md:w-96 bg-neutral-900 border border-neutral-800 rounded-xl shadow-2xl overflow-hidden z-[9999] animate-in fade-in slide-in-from-top-3 duration-200">
+                  <div className="absolute right-0 mt-3 w-80 md:w-96 bg-neutral-900 border border-neutral-800 rounded-xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-3 duration-200">
                     <div className="p-4 border-b border-neutral-800 bg-neutral-950/40 flex justify-between items-center">
                       <span className="text-sm font-bold text-white flex items-center gap-1.5">
                         <Bell
@@ -1424,11 +1292,6 @@ export default function Layout() {
       <AudioPlayer />
       <PushOptInPrompt />
       <NewBeatAnnouncementModal />
-      <ProducerProfileModal
-        isOpen={isProfileModalOpen}
-        onClose={() => setIsProfileModalOpen(false)}
-        initialTab={profileModalTab}
-      />
 
       {/* Full-Screen Accessibility Uploader Overlay */}
       {isUploaderOverlayOpen && (
