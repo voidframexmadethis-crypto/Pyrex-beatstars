@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Beat } from '../types';
+import SecureCheckoutModal from './SecureCheckoutModal';
 
 interface CustomPlayerProps {
   beat: Beat & { 
@@ -14,6 +15,7 @@ interface CustomPlayerProps {
 export default function CustomPlayer({ beat }: CustomPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [showCheckout, setShowCheckout] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   // Set default audio volume lower to prevent it from being "very high"
@@ -150,13 +152,23 @@ export default function CustomPlayer({ beat }: CustomPlayerProps) {
           onClick={() => {
             if (beat.onCheckout) {
               beat.onCheckout(beat);
+            } else {
+              setShowCheckout(true);
             }
           }}
           className="bg-zinc-900 hover:bg-zinc-800 text-white border border-zinc-700 px-4 py-2 rounded-lg text-sm font-semibold transition-all"
         >
-          Instant Crypto Buy
+          Instant Checkout
         </button>
       </div>
+
+      {/* Secure Checkout Modal */}
+      {showCheckout && (
+        <SecureCheckoutModal 
+          beat={beat} 
+          onClose={() => setShowCheckout(false)} 
+        />
+      )}
 
       {/* Hidden high-definition audio element (.m4a stream) */}
       <audio 

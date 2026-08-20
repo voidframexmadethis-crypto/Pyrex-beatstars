@@ -24,12 +24,17 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ beat, onClose, onS
   const { state } = useStore();
   const config = state.profile.marketingConfig;
 
-  const licensePrices: Record<string, number> = {
-    'MP3 Lease': beat?.licenses?.mp3Lease?.price ?? config?.defaultMp3Price ?? 0,
-    'WAV Lease': beat?.licenses?.wavLease?.price ?? config?.defaultWavPrice ?? 0,
-    'Trackout Stems': beat?.licenses?.premiumLease?.price ?? config?.defaultStemsPrice ?? 0,
-    'Exclusive Rights': beat?.licenses?.exclusive?.price ?? config?.defaultExclusivePrice ?? 0,
-  };
+  const licenses = [
+    { name: "MP3 Lease", price: beat?.licenses?.mp3Lease?.price ?? config?.defaultMp3Price ?? 29.99 },
+    { name: "WAV Lease", price: beat?.licenses?.wavLease?.price ?? beat?.price ?? config?.defaultWavPrice ?? 49.99 },
+    { name: "Trackout Stems", price: beat?.licenses?.premiumLease?.price ?? config?.defaultStemsPrice ?? 99.99 },
+    { name: "Exclusive Rights", price: beat?.licenses?.exclusive?.price ?? config?.defaultExclusivePrice ?? 999.99 },
+  ];
+
+  const licensePrices: Record<string, number> = licenses.reduce((acc, lic) => {
+    acc[lic.name] = typeof lic.price === 'number' ? lic.price : (Number(lic.price) || 0);
+    return acc;
+  }, {} as Record<string, number>);
 
   // If beat has a customPrice, use it as the finalPrice, otherwise fallback to license/standard logic
   const finalPrice = (beat as any)?.customPrice ?? licensePrices[licenseType] ?? beat?.price ?? config?.defaultMp3Price ?? 0;
@@ -248,9 +253,9 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ beat, onClose, onS
                   onChange={(e) => setLicenseType(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-purple-500 cursor-pointer"
                 >
-                  {Object.keys(licensePrices).map((tier) => (
-                    <option key={tier} value={tier}>
-                      {tier} — ${licensePrices[tier]} USD
+                  {licenses.map((tier) => (
+                    <option key={tier.name} value={tier.name}>
+                      {tier.name} — ${typeof tier.price === 'number' ? tier.price.toFixed(2) : tier.price} USD
                     </option>
                   ))}
                 </select>
