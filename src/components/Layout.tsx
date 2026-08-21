@@ -26,6 +26,7 @@ import {
   Scale,
   Wallet,
   Layers,
+  ShoppingCart,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useStore } from "../context/StoreContext";
@@ -407,6 +408,8 @@ export default function Layout() {
     { to: "/videos", icon: Youtube, label: "YouTube Videos" },
     { to: "/audio-player", icon: Music, label: "Audio Player" },
     { to: "/enterprise", icon: Radio, label: "Services" },
+    { to: "/merch", icon: ShoppingCart, label: "Merch" },
+    { href: "https://pyrex-spinna-shop.fourthwall.com/", icon: ShoppingCart, label: "Official Shop" },
   ];
 
   return (
@@ -493,21 +496,35 @@ export default function Layout() {
             🔥 Build Big Bundle (Pick 5-6 Packs)
           </button>
           {navItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              className={({ isActive }) =>
-                `flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
-                  isActive
-                    ? "bg-indigo-500/10 text-indigo-400 font-medium"
-                    : "text-neutral-400 hover:bg-neutral-800 hover:text-neutral-200"
-                }`
-              }
-              onClick={() => setSidebarOpen(false)}
-            >
-              <item.icon className="w-5 h-5" />
-              <span>{item.label}</span>
-            </NavLink>
+            item.href ? (
+              <a
+                key={item.href}
+                href={item.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors text-neutral-400 hover:bg-neutral-800 hover:text-neutral-200"
+                onClick={() => setSidebarOpen(false)}
+              >
+                <item.icon className="w-5 h-5" />
+                <span>{item.label}</span>
+              </a>
+            ) : (
+              <NavLink
+                key={item.to}
+                to={item.to || "/"}
+                className={({ isActive }) =>
+                  `flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
+                    isActive
+                      ? "bg-indigo-500/10 text-indigo-400 font-medium"
+                      : "text-neutral-400 hover:bg-neutral-800 hover:text-neutral-200"
+                  }`
+                }
+                onClick={() => setSidebarOpen(false)}
+              >
+                <item.icon className="w-5 h-5" />
+                <span>{item.label}</span>
+              </NavLink>
+            )
           ))}
         </nav>
 

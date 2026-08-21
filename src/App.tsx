@@ -49,6 +49,7 @@ const SonicSearchPage = safeLazy(() => import('./pages/SonicSearchPage'), 'Sonic
 const OfflineSimulator = safeLazy(() => import('./components/OfflineSimulator'), 'OfflineSimulator');
 const VaultPage = safeLazy(() => import('./pages/VaultPage'), 'VaultPage');
 const BeatStore = safeLazy(() => import('./pages/BeatStore'), 'BeatStore');
+const Merch = safeLazy(() => import('./pages/Merch'), 'Merch');
 
 // Elegant, domain-appropriate page loading indicator
 const PageLoader = () => (
@@ -424,6 +425,14 @@ export default function App() {
                           element={
                             <ErrorBoundary name="Beat Store">
                               <BeatStore />
+                            </ErrorBoundary>
+                          } 
+                        />
+                        <Route 
+                          path="merch" 
+                          element={
+                            <ErrorBoundary name="Merch Page">
+                              <Merch />
                             </ErrorBoundary>
                           } 
                         />

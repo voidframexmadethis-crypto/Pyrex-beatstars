@@ -8,6 +8,11 @@ type Props = {
   className?: string;
 };
 
+// Save track info whenever a beat starts playing
+function savePlayerState(trackData: { title?: string; artworkUrl?: string }) {
+  localStorage.setItem('pyrex_active_track', JSON.stringify(trackData));
+}
+
 export default function TrackPlayer({ src, title, className }: Props) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -17,6 +22,25 @@ export default function TrackPlayer({ src, title, className }: Props) {
   const [duration, setDuration] = useState(0);
 
   const canPlay = useMemo(() => typeof src === "string" && src.length > 0, [src]);
+
+  // Restore track info instantly when the page loads
+  useEffect(() => {
+    const savedTrack = localStorage.getItem('pyrex_active_track');
+    if (savedTrack) {
+      try {
+        const track = JSON.parse(savedTrack);
+        
+        // Target your bottom player elements and restore them
+        const titleEl = document.querySelector('.player-title');
+        const imgEl = document.querySelector('.player-thumb') as HTMLImageElement;
+        
+        if (titleEl) titleEl.textContent = track.title;
+        if (imgEl && track.artworkUrl) imgEl.src = track.artworkUrl;
+      } catch (e) {
+        console.error("Failed to restore player state", e);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     setError(null);
@@ -35,7 +59,10 @@ export default function TrackPlayer({ src, title, className }: Props) {
     const audio = audioRef.current;
     if (!audio) return;
 
-    const onPlay = () => setIsPlaying(true);
+    const onPlay = () => {
+      setIsPlaying(true);
+      savePlayerState({ title, artworkUrl: "" }); // You may need to pass artworkUrl in props if available
+    };
     const onPause = () => setIsPlaying(false);
     const onWaiting = () => setIsBuffering(true);
     const onPlaying = () => setIsBuffering(false);
@@ -69,7 +96,7 @@ export default function TrackPlayer({ src, title, className }: Props) {
       audio.removeEventListener("error", onError);
       audio.removeEventListener("timeupdate", onTimeUpdate);
     };
-  }, []);
+  }, [title]); // Added title dependency to update onPlay if title changes
 
   const toggle = async () => {
     const audio = audioRef.current;

@@ -33,8 +33,8 @@ export function WaveformVisualizer({ isPlaying, progress = 35, onSeek }: Wavefor
           return (
             <div 
               key={bar.id}
-              className={`w-[3px] rounded-full transition-all duration-150 ${
-                isPassed ? 'bg-purple-500' : 'bg-neutral-700'
+              className={`w-[5px] rounded-full transition-all duration-100 ease-out ${
+                isPassed ? 'bg-red-600' : 'bg-neutral-700'
               } ${isPlaying ? 'animate-pulse' : ''}`}
               style={{ 
                 height: `${bar.height}px`,

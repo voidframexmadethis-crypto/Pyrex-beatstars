@@ -4,7 +4,9 @@
   --midnight: #020204;
   --glass-bg: rgba(10, 10, 14, 0.7);
   --glass-border: rgba(255, 255, 255, 0.08);
-  --accent-glow: rgba(99, 102, 241, 0.15);
+  --theme-accent: #ff1a1a; /* Pure Trap Red */
+  --theme-glow: rgba(255, 26, 26, 0.3);
+  --bg-image: url('/background.png'); /* Drop any new image here and it updates everywhere */
 }
 
 /* Container that holds the waveform */
@@ -82,8 +84,20 @@
   @apply drop-shadow-sm;
 }
 
-html, body {
-  background-color: var(--midnight);
+html {
+  background-color: #050505;
+  width: 100%;
+  min-height: 100vh;
+}
+
+body {
+  background-color: #050505;
+  background-image: 
+      linear-gradient(to bottom, rgba(5, 5, 5, 0.75), rgba(5, 5, 5, 0.90)), 
+      var(--bg-image);
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
   color: #ffffff;
   margin: 0;
   padding: 0;
@@ -694,15 +708,16 @@ body {
   }
 }
 
-/* PYREX SPINNA ROYAL METALLIC PURPLE THEME OVERRIDES */
+/* PYREX SPINNA ROYAL TRAP RED THEME OVERRIDES */
 :root {
   --midnight: #030305;
   --glass-bg: rgba(6, 6, 9, 0.75);
-  --glass-border: rgba(168, 85, 247, 0.22);
-  --accent-glow: rgba(168, 85, 247, 0.25);
-  --primary-purple: #9333ea;
-  --light-purple: #c084fc;
-  --dark-purple: #6b21a8;
+  --glass-border: rgba(255, 26, 26, 0.22);
+  --theme-accent: #ff1a1a;
+  --theme-glow: rgba(255, 26, 26, 0.3);
+  --primary-red: #cc0000;
+  --light-red: #ff4d4d;
+  --dark-red: #800000;
 }
 
 /* Base button and clickable overrides to guarantee pristine consistency */
@@ -917,4 +932,125 @@ input::placeholder, textarea::placeholder {
 
 .scrubber::-webkit-slider-thumb:hover {
   transform: scale(1.2);
+}
+
+.merch-section {
+  padding: 3rem 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.section-header h2 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: white;
+}
+
+.view-all-link {
+  color: #a855f7;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.merch-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2rem;
+}
+
+.merch-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 1rem;
+  transition: background 0.3s;
+}
+
+.merch-card:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.image-container img {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+.merch-info h3 {
+  font-size: 1.25rem;
+  margin: 1rem 0 0.5rem;
+  color: white;
+}
+
+.category {
+  color: #a1a1aa;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}
+
+.price {
+  font-size: 1.125rem;
+  font-weight: bold;
+  color: #a855f7;
+  margin-bottom: 1rem;
+}
+
+.merch-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.merch-actions a {
+  flex: 1;
+  text-align: center;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.btn-view {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.btn-buy {
+  background: #fff;
+  color: #000;
+}
+
+/* All buttons, tags, and interactive elements inherit theme colors automatically */
+.secure-beat-btn, 
+.trap-play-btn, 
+.price-tag, 
+.main-bottom-player-bar {
+    border-color: var(--theme-accent) !important;
+    box-shadow: 0 0 15px var(--theme-glow);
+}
+
+.secure-beat-btn {
+    background: linear-gradient(135deg, #800000, var(--theme-accent)) !important;
+    color: #ffffff;
+}
+
+/* Softened background glow overlay instead of blinding brightness */
+.bg-glow-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 50% 30%, var(--theme-glow) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 1;
 }
