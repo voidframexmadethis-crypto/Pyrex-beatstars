@@ -44,6 +44,7 @@ interface StoreContextType {
 }
 
 import { deduplicateTracks, getTrackFingerprint } from '../utils/deduplicate';
+import { loadStoreBeats } from '../lib/beatLoader';
 
 const dedupe = (items: Beat[]) => deduplicateTracks(items as any) as Beat[];
 
@@ -286,10 +287,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const fetchCloudBeats = async () => {
       try {
-        const res = await fetch('/api/beats');
-        const data = await res.json();
-        if (data && data.beats && Array.isArray(data.beats) && data.beats.length > 0) {
-          const fetchedCloudBeats: Beat[] = data.beats.map((item: any) => {
+        // Fetch from old backend API AND Supabase
+        const [apiRes, supabaseBeats] = await Promise.all([
+          fetch('/api/beats').then(res => res.json()).catch(() => ({ beats: [] })),
+          loadStoreBeats().catch(() => [])
+        ]);
+
+        const cloudBeats = apiRes.beats || [];
+        
+        const allFetched = [...cloudBeats, ...supabaseBeats];
+
+        if (allFetched.length > 0) {
+          const fetchedBeats: Beat[] = allFetched.map((item: any) => {
             const config = state.profile.marketingConfig;
             const mp3 = Number(item.priceMp3) || config?.defaultMp3Price || 29.99;
             const wav = Number(item.priceWav) || config?.defaultWavPrice || 49.99;
@@ -304,7 +313,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
               bpm: Number(item.bpm) || 120,
               key: item.musicalKey || 'C Min',
               price: mp3,
-              coverArtUrl: item.coverArtUrl || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&auto=format&fit=crop&q=60',
+              coverArtUrl: item.coverArtUrl || item.artworkUrl || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&auto=format&fit=crop&q=60',
               backupArtworkUrl: item.backupArtworkUrl,
               r2ArtworkUrl: item.r2ArtworkUrl,
               audioUrl: item.taggedMp3Url || item.audioUrl,
@@ -327,7 +336,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           });
 
           setState(prev => {
-            const combined = [...prev.beats, ...fetchedCloudBeats];
+            const combined = [...prev.beats, ...fetchedBeats];
             return {
               ...prev,
               beats: dedupe(combined),
@@ -338,7 +347,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           setState(prev => ({ ...prev, isLoading: false }));
         }
       } catch (err) {
-        console.warn("Failed to load cloud database beats from backend:", err);
+        console.warn("Failed to load cloud database beats:", err);
         setState(prev => ({ ...prev, isLoading: false }));
       }
     };

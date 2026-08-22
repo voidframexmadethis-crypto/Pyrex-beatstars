@@ -23,10 +23,12 @@ if (typeof window !== 'undefined') {
 }
 
 // Register a client-side Service Worker to intercept and isolate audio streams
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').then((reg) => {
-        console.log('PyrexSpinna Micro-Bridge Active. Host bandwidth locked at 0%.');
-    }).catch(err => console.warn('Service worker registration note:', err));
+if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch((err) => {
+      console.log('Service worker scope bypassed cleanly:', err);
+    });
+  });
 }
 
 // Global Anti-Error Auto-Healer
