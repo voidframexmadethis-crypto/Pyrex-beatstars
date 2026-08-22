@@ -1,28 +1,19 @@
-import React, { useState } from 'react';
-import { initialBeatCatalog } from '../data/beatCatalog';
+import React, { useState, useEffect } from 'react';
+import { getMasterStoreBeats } from '../utils/masterMediaPipeline';
 import type { CatalogBeat } from '../data/beatCatalog';
 
 export type { CatalogBeat };
 
 export default function BeatStore() {
-  // 1. Replace your useState for beats with this persistent LocalStorage version:
-  const [beats, setBeats] = useState<CatalogBeat[]>(() => {
-    const savedBeats = localStorage.getItem('pyrexx_beat_catalog');
-    if (savedBeats) {
-      try {
-        return JSON.parse(savedBeats);
-      } catch (e) {
-        console.error("Failed to parse saved beats", e);
-      }
-    }
-    // Default starting beats if nothing is saved yet
-    return [];
-  });
+  const [beats, setBeats] = useState<CatalogBeat[]>([]);
 
-  // Save to localStorage automatically whenever your beats array changes:
-  React.useEffect(() => {
-    localStorage.setItem('pyrexx_beat_catalog', JSON.stringify(beats));
-  }, [beats]);
+  useEffect(() => {
+    async function loadData() {
+      const lockedBeats = await getMasterStoreBeats();
+      setBeats(lockedBeats);
+    }
+    loadData();
+  }, []);
 
   const [activeBeat, setActiveBeat] = useState<CatalogBeat | null>(null);
   const [customPrice, setCustomPrice] = useState<string | number>('');

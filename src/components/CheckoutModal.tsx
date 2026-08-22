@@ -24,6 +24,24 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ beat, onClose, onS
   const { state } = useStore();
   const config = state.profile.marketingConfig;
 
+  // STRICT CHECK: If database price is missing, do not show a fake fallback price
+  const price = beat?.basicPrice;
+  if (price === undefined || price === null) {
+    return (
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-5"
+      >
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl max-w-sm w-full text-center">
+          <p className="text-red-500 font-bold mb-4">Error: Price not locked in database.</p>
+          <button onClick={onClose} className="w-full bg-slate-800 text-white rounded-xl p-3 font-bold cursor-pointer hover:bg-slate-700">Close</button>
+        </div>
+      </motion.div>
+    );
+  }
+
   const licenses = [
     { name: "MP3 Lease", price: beat?.licenses?.mp3Lease?.price ?? config?.defaultMp3Price ?? 29.99 },
     { name: "WAV Lease", price: beat?.licenses?.wavLease?.price ?? beat?.price ?? config?.defaultWavPrice ?? 49.99 },
@@ -200,7 +218,8 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ beat, onClose, onS
             <div className="text-white font-bold text-sm">"{trackTitle}"</div>
           </div>
           <div className="text-right">
-            <div className="text-emerald-400 font-bold text-lg">${finalPrice}</div>
+            {/* Uses the locked Supabase price, falling back only if undefined */}
+            <div id="checkout-display-price" className="text-emerald-400 font-bold text-lg">${(beat?.basicPrice || 29.00).toFixed(2)} USD</div>
             <div className="text-[10px] text-purple-400">{licenseType}</div>
           </div>
         </div>
@@ -297,7 +316,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ beat, onClose, onS
                   </>
                 ) : (
                   <>
-                    <span>⚡ Pay ${finalPrice} with 1-Tap (Apple Pay / GPay)</span>
+                    <span>⚡ Pay ${(beat?.basicPrice || 29.00).toFixed(2)} WITH 1-TAP</span>
                   </>
                 )}
               </button>

@@ -7,37 +7,19 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // 2. Master Resolver locking down Title, Artwork, Audio, AND Pricing
 export function resolveMasterTrackAsset(rawTrack: any) {
-  const archiveItem = "pyrex-spinna-beats-collection";
-
-  const audioSource = rawTrack.audioFileName 
-    ? `https://archive.org/download/${archiveItem}/${rawTrack.audioFileName}` 
-    : (rawTrack.audioUrl || "");
-
-  const artworkSource = rawTrack.artworkFileName 
-    ? `https://archive.org/download/${archiveItem}/${rawTrack.artworkFileName}` 
-    : (rawTrack.artworkUrl || "/images/default-cover.jpg");
-
-  const safeTitle = rawTrack.title && rawTrack.title.trim() !== "" 
-    ? rawTrack.title 
-    : "Untitled Production";
-
-  // 3. Iron-clad Pricing Protection (Prevents prices from resetting or vanishing)
-  const lockedBasicPrice = typeof rawTrack.basic_price === 'number' && !isNaN(rawTrack.basic_price) 
-    ? rawTrack.basic_price 
-    : 29.00; // Your default safe fallback price
-
-  const lockedExclusivePrice = typeof rawTrack.exclusive_price === 'number' && !isNaN(rawTrack.exclusive_price) 
-    ? rawTrack.exclusive_price 
-    : 299.00;
+  // Zero tolerance: If Supabase doesn't have it, log an explicit error
+  if (!rawTrack.title || !rawTrack.audio_url) {
+    console.error("Critical: Track missing required database fields!", rawTrack);
+  }
 
   return {
     ...rawTrack,
-    title: safeTitle,
-    audioUrl: audioSource,
-    artworkUrl: artworkSource,
-    // Permanent pricing attached directly to the Supabase data row
-    basicPrice: lockedBasicPrice,
-    exclusivePrice: lockedExclusivePrice,
+    // NO MORE "Untitled Production" fallbacks — forces your exact database text
+    title: rawTrack.title, 
+    audioUrl: rawTrack.audio_url,
+    artworkUrl: rawTrack.artwork_url, // No fake default images
+    basicPrice: rawTrack.basic_price, // No fake pricing fallbacks
+    exclusivePrice: rawTrack.exclusive_price,
     edgePoweredBy: "Cloudflare-IA-Supabase-Harmony"
   };
 }
